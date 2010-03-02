@@ -1,0 +1,271 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Ukrainian resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_UKR)
+#ifdef _WIN32
+LANGUAGE LANG_UKRAINIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\reed.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\reed.ico"
+IDI_ICON1               ICON                    "res\\BOK.ICO"
+#endif    // Ukrainian resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 58
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About reed"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,15,20,20
+    LTEXT           "Reed-Solomon Files Protection",IDC_STATIC,45,11,119,8,SS_NOPREFIX
+    LTEXT           "by Ruslan Yushchenko, 2009",IDC_STATIC,45,23,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+    LTEXT           "Version 1.04",IDC_STATIC,45,38,119,8
+END
+
+IDD_REED_DIALOG DIALOGEX 0, 0, 487, 274
+STYLE DS_ABSALIGN | DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Reed-Solomon Files Protection"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    GROUPBOX        " Files in Recovery Info ",IDC_STATIC,7,7,255,239
+    CONTROL         "List1",IDC_LIST_FILES,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,15,32,238,181
+    PUSHBUTTON      "Add Files...",IDC_BTN_ADD,15,221,60,17
+    PUSHBUTTON      "Remove Files",IDC_BTN_REMOVE,79,221,60,17
+    PUSHBUTTON      "Quick Check",IDC_BTN_CHECK_THIS,157,221,48,17
+    PUSHBUTTON      "Recover",IDC_BTN_RECOVER_THIS,210,221,42,17
+    GROUPBOX        " Options",IDC_STATIC,267,7,211,92
+    CONTROL         "  Fixed:",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,274,33,68,10
+    CONTROL         "  Portion of Data:",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,273,75,74,10
+    LTEXT           "Total Size: ",IDC_STATIC,16,19,49,8
+    LTEXT           "100",IDC_STATIC_TOTAL_SIZE,80,19,91,8
+    EDITTEXT        IDC_EDIT_REC_SIZE,354,32,36,13,ES_AUTOHSCROLL
+    LTEXT           "MB",IDC_STATIC,395,34,20,8
+    LTEXT           "Sector Size:",IDC_STATIC,290,52,45,8
+    EDITTEXT        IDC_EDIT_SECTOR_SIZE,354,51,36,13,ES_AUTOHSCROLL
+    LTEXT           "KB",IDC_STATIC,395,53,15,8
+    LTEXT           "Count =",IDC_STATIC,411,53,27,8
+    LTEXT           "100",IDC_STATIC_SECTOR_COUNT,439,53,34,8
+    EDITTEXT        IDC_EDIT_PERCENT_SIZE,353,74,36,13,ES_AUTOHSCROLL
+    LTEXT           "%",IDC_STATIC,395,76,10,8
+    PUSHBUTTON      "Calculate",IDC_BTN_CALCULATE,428,74,50,14,NOT WS_VISIBLE
+    CONTROL         "Quadratic Protection",IDC_CHK_QUADRO,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,351,7,82,12
+    PUSHBUTTON      "Specify Location...",IDC_BTN_LOCATE2,411,7,67,17,NOT WS_VISIBLE
+    GROUPBOX        " Protect ",IDC_STATIC,268,103,211,41
+    PUSHBUTTON      "Protect Files",IDC_BTN_PROTECT_FILES,275,118,85,17
+    LTEXT           "or",IDC_STATIC,369,121,8,8
+    PUSHBUTTON      "Protect a Directory",IDC_BTN_PROTECT_DIRECTORY,385,118,85,17
+    GROUPBOX        " Recover ",IDC_STATIC,267,147,211,99
+    LTEXT           "1.",IDC_STATIC,270,166,8,8
+    PUSHBUTTON      "Load Recovery Info",IDC_BTN_LOAD_RECOVERY,280,162,71,17
+    LTEXT           "2.",IDC_STATIC,358,167,8,8
+    PUSHBUTTON      "Full Check",IDC_BTN_CHECK,366,162,45,17
+    LTEXT           "3.",IDC_STATIC,416,167,8,8
+    PUSHBUTTON      "Full Recover",IDC_BTN_RECOVER,424,162,49,17
+    CONTROL         "Recover in place",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,278,191,78,12
+    CONTROL         "Select a path to recover to",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,278,209,122,12
+    EDITTEXT        IDC_EDIT_RECOVER_PATH,289,224,162,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BTN_RECOVER_PATH,453,224,15,13
+    PUSHBUTTON      "Exit",IDCANCEL,418,251,60,16
+    LTEXT           "Recovery Info Size:",IDC_STATIC,276,19,70,8
+END
+
+IDD_PROGRESS DIALOGEX 0, 0, 239, 95
+STYLE DS_ABSALIGN | DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION
+CAPTION "Progress"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Cancel",IDC_BTN_CANCEL,96,74,50,14
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,7,46,225,14
+    CTEXT           "Static",IDC_OPERATION,7,7,225,12
+    CTEXT           "Static",IDC_FILENAME,7,24,225,17
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,4,1
+ PRODUCTVERSION 1,0,4,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Ruslan Yushchenko"
+            VALUE "FileDescription", "Reed-Solomon Files Protection"
+            VALUE "FileVersion", "1, 0, 4, 1"
+            VALUE "InternalName", "reed"
+            VALUE "LegalCopyright", "Freeware"
+            VALUE "OriginalFilename", "reed.exe"
+            VALUE "ProductName", "Reed-Solomon Files Protection"
+            VALUE "ProductVersion", "1, 0, 4, 1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 51
+    END
+
+    IDD_REED_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 478
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
+    END
+
+    IDD_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 232
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About reed..."
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\reed.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
