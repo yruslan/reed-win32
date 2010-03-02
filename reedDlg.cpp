@@ -900,6 +900,8 @@ void CReedDlg::OnBtnRemove()
 		rec.m_nTotalSize-=fi.size;
 		rec.m_arFiles.RemoveAt(nRow);
 	}
+	if (m_lstFiles.GetItemCount()==0)
+		m_szPath=_T("");
 	InvalidateControls();
 
 
