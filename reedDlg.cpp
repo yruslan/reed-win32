@@ -891,14 +891,27 @@ void CReedDlg::OnBtnRemove()
 
 	UINT flag = LVNI_SELECTED;
 	int nRow;
+	bool bFound=false;
 	for( nRow = m_lstFiles.GetItemCount()-1; nRow >=0; nRow -- )
 	{
 		if ((m_lstFiles.GetItemState(nRow, flag) & flag) != flag ) 
 			continue;
+		bFound=true;
 		m_lstFiles.DeleteItem(nRow);
 		t_FileInfo fi = rec.m_arFiles.GetAt(nRow);
 		rec.m_nTotalSize-=fi.size;
 		rec.m_arFiles.RemoveAt(nRow);
+	}
+	if (!bFound)
+	{
+		for( nRow = m_lstFiles.GetItemCount()-1; nRow >=0; nRow -- )
+		{
+			m_lstFiles.DeleteItem(nRow);
+			t_FileInfo fi = rec.m_arFiles.GetAt(nRow);
+			rec.m_nTotalSize-=fi.size;
+			rec.m_arFiles.RemoveAt(nRow);
+		}
+		rec.m_nTotalSize=0;
 	}
 	if (m_lstFiles.GetItemCount()==0)
 		m_szPath=_T("");

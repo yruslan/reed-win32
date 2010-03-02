@@ -391,23 +391,11 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath="..\..\BOK\BOK.ICO"
-				>
-			</File>
-			<File
 				RelativePath=".\res\BOK.ICO"
 				>
 			</File>
 			<File
-				RelativePath="res\Box HD.ico"
-				>
-			</File>
-			<File
 				RelativePath="res\Frog Empty.ico"
-				>
-			</File>
-			<File
-				RelativePath="res\icon1.ico"
 				>
 			</File>
 			<File
@@ -416,10 +404,6 @@
 			</File>
 			<File
 				RelativePath="res\reed.rc2"
-				>
-			</File>
-			<File
-				RelativePath="res\Snake Empty.ico"
 				>
 			</File>
 		</Filter>
