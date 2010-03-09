@@ -1,0 +1,9 @@
+glob:reed.vcproj.NEBULA.we.user
+glob:reed.ncb
+glob:reed.plg
+glob:reed.suo
+glob:reed.clw
+glob:reed.opt
+glob:reed.aps
+glob:.hgignore
+glob:Release/*
