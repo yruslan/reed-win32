@@ -107,6 +107,7 @@ private:
 	int CheckFile(t_FileInfo &fi);
 
 	CString m_szRecFileName;
+	CString m_szTempFile;
 	FILE *fRest;
 
 	int m_nCntSectors;

@@ -76,12 +76,11 @@ CProtector::~CProtector()
 	{
 		fclose(fRest);
 		fRest = NULL;
-		if (m_szRecFileName!="")
-		{
-			CString s = m_szRecFileName + ".tmp";
-			_tunlink(s);
-			m_szRecFileName="";
-		}
+	}
+	if (m_szTempFile!=_T(""))
+	{
+		_tunlink(m_szTempFile);
+		m_szTempFile=_T("");
 	}
 }
 
@@ -107,13 +106,15 @@ void CProtector::Clear()
 	{
 		fclose(fRest);
 		fRest = NULL;
-		if (m_szRecFileName!="")
-		{
-			CString s = m_szRecFileName + ".tmp";
-			_tunlink(s);
-		}
 	}
-	m_szRecFileName = "";
+	
+	if (m_szTempFile!=_T(""))
+	{
+		_tunlink(m_szTempFile);
+		m_szTempFile = _T("");
+	}
+	
+	m_szRecFileName = _T("");
 }
 
 void CProtector::Init_CRC32_Table()
@@ -1094,7 +1095,10 @@ int CProtector::GetTmpFileName(CString &szFileName)
 		}
 	}
 	else
+	{
 		fclose(f);
+		_tunlink(szFileName);
+	}
 
 	return 0;
 }
@@ -1133,9 +1137,11 @@ int CProtector::Check2()
 	}
 	int nSectorsPerSeg = nSegSize / m_nRecoverySectorSize;
 
-	CString szTempFile;
-	int rc = GetTmpFileName(szTempFile);
-	if (rc!=0)	return E_TMP_FILENAME; 
+	if (m_szTempFile==_T(""))
+	{
+		int rc = GetTmpFileName(m_szTempFile);
+		if (rc!=0)	return E_TMP_FILENAME; 
+	}
 	
 	m_szRestSum = new char [nSegSize];
 	if (m_szRestSum==NULL)
@@ -1227,8 +1233,7 @@ int CProtector::Check2()
 			{
 				fclose(fRest);
 				fRest = NULL;
-				if (szTempFile!=_T(""))
-					_tunlink(szTempFile);
+				_tunlink(m_szTempFile);
 			}
 			if (buf!=NULL)
 				delete [] buf;
@@ -1248,14 +1253,12 @@ int CProtector::Check2()
 		{
 			fclose(fRest);
 			fRest = NULL;
-			if (szTempFile!=_T(""))
-				_tunlink(szTempFile);
 		}
 
-		if ((fRest=_tfopen(szTempFile,_T("w")) )==NULL) return E_FILE_CANNOT_WRITE;
+		if ((fRest=_tfopen(m_szTempFile,_T("w")) )==NULL) return E_FILE_CANNOT_WRITE;
 		fclose(fRest);
 		fRest=NULL;
-		if ((fRest=_tfopen(szTempFile,_T("rb+")) )==NULL) return E_FILE_CANNOT_WRITE;
+		if ((fRest=_tfopen(m_szTempFile,_T("rb+")) )==NULL) return E_FILE_CANNOT_WRITE;
 	}
 
 	//FILESIZE data_written=0;
@@ -1394,8 +1397,7 @@ int CProtector::Check2()
 					{
 						fclose(fRest);
 						fRest = NULL;
-						if (szTempFile!=_T(""))
-							_tunlink(szTempFile);
+						_tunlink(m_szTempFile);
 					}
 					if (buf!=NULL)
 						delete [] buf;
@@ -1478,7 +1480,7 @@ int CProtector::Check2()
 		{
 			fclose(fRest);
 			fRest=NULL;
-			_tunlink(szTempFile);
+			_tunlink(m_szTempFile);
 		}
 	}
 
@@ -1837,11 +1839,12 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 
 	if (m_nCntRecoverable==0)
 	{
-		CString szTempFile;
-		szTempFile.Format(_T("%s.tmp"), m_szRecFileName);
-		fclose(fRest);
-		fRest=NULL;
-		_tunlink(szTempFile);
+		if (fRest!=NULL)
+		{
+			fclose(fRest);
+			fRest=NULL;
+			_tunlink(m_szTempFile);
+		}
 	}
 
 	if (bOk)
@@ -1884,8 +1887,8 @@ int CProtector::CheckAndRecoverSmall()
 	}
 	int nSectorsPerSeg = nSegSize / m_nRecoverySectorSize;
 
-	CString szTempFile;
-	int rc = GetTmpFileName(szTempFile);
+	CString m_szTempFile;
+	int rc = GetTmpFileName(m_szTempFile);
 	if (rc!=0)	return E_TMP_FILENAME; 
 	
 	m_szRestSum = new char [nSegSize];
@@ -2181,21 +2184,6 @@ int CProtector::AddDir(LPCTSTR szPath)
 			pcnt++;
 #endif
 		}
-		
-
-		//Check List
-/*		while ()
-		{
-			if (file)
-			{
-			}
-
-			if (directory)
-			{
-
-			}
-		}
-*/
 	}
 
 	return 0;

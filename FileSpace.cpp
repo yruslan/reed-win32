@@ -367,7 +367,7 @@ int CFileSpace::ReadSector(void *buf)
 			{
 				FILESIZE sz1 = m_arSizes.GetAt(m_nCurrentFile);
 
-				if (sz1 >= m_nCurrentFilePos)
+				if (sz1 < m_nCurrentFilePos)
 				{
 					size = 0;
 				}
