@@ -339,20 +339,29 @@ int CFileSpace::ReadSector(void *buf)
 		{
 			if (!feof(file))
 			{
-				size = fread(buf, 1, m_nSectorSize, file);
-				if (size == 0)
+				FILESIZE sz1 = m_arSizes.GetAt(m_nCurrentFile);
+
+				if (sz1 < m_nCurrentFilePos)
 				{
-					fclose(file);
-					file = NULL;
+					size = 0;
 				}
 				else
 				{
-					if (size < (size_t) m_nSectorSize)
+					size = fread(buf, 1, m_nSectorSize, file);
+					if (size == 0)
 					{
-						memset(((char *)buf)+size, 0, m_nSectorSize - size);
-						size = m_nSectorSize;
+						fclose(file);
+						file = NULL;
 					}
-					m_nCurrentFilePos+=m_nSectorSize;
+					else
+					{
+						if (size < (size_t) m_nSectorSize)
+						{
+							memset(((char *)buf)+size, 0, m_nSectorSize - size);
+							size = m_nSectorSize;
+						}
+						m_nCurrentFilePos+=m_nSectorSize;
+					}
 				}
 			}
 			else
