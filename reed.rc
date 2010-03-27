@@ -118,7 +118,7 @@ BEGIN
     EDITTEXT        IDC_EDIT_REC_SIZE,354,32,36,13,ES_AUTOHSCROLL
     LTEXT           "MB",IDC_STATIC,395,34,20,8
     LTEXT           "Sector Size:",IDC_STATIC,290,52,45,8
-    EDITTEXT        IDC_EDIT_SECTOR_SIZE,354,51,36,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_SECTOR_SIZE,354,51,36,13,ES_AUTOHSCROLL | WS_DISABLED
     LTEXT           "KB",IDC_STATIC,395,53,15,8
     LTEXT           "Count =",IDC_STATIC,411,53,27,8
     LTEXT           "100",IDC_STATIC_SECTOR_COUNT,439,53,34,8
@@ -164,8 +164,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,5,1
- PRODUCTVERSION 1,0,5,1
+ FILEVERSION 1,0,5,2
+ PRODUCTVERSION 1,0,5,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -182,12 +182,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Ruslan Yushchenko"
             VALUE "FileDescription", "Reed-Solomon Files Protection"
-            VALUE "FileVersion", "1, 0, 5, 1"
+            VALUE "FileVersion", "1, 0, 5, 2"
             VALUE "InternalName", "reed"
             VALUE "LegalCopyright", "Freeware"
             VALUE "OriginalFilename", "reed.exe"
             VALUE "ProductName", "Reed-Solomon Files Protection"
-            VALUE "ProductVersion", "1, 0, 5, 1"
+            VALUE "ProductVersion", "1, 0, 5, 2"
         END
     END
     BLOCK "VarFileInfo"

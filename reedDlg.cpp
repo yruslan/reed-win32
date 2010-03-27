@@ -150,6 +150,7 @@ BEGIN_MESSAGE_MAP(CReedDlg, CDialog)
 	ON_EN_KILLFOCUS(IDC_EDIT_PERCENT_SIZE, &CReedDlg::OnEnKillfocusEditPercentSize)
 	ON_COMMAND(ID_CUSTOM_COMPLETED, &CReedDlg::OnComplete)
 	ON_WM_SETCURSOR()
+	ON_EN_CHANGE(IDC_EDIT_REC_SIZE, &CReedDlg::OnEnChangeEditRecSize)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -446,7 +447,7 @@ void CReedDlg::InvalidateControls()
 		if (m_nRadio==0)
 		{
 			GetDlgItem(IDC_EDIT_REC_SIZE)->EnableWindow(TRUE);
-			GetDlgItem(IDC_EDIT_SECTOR_SIZE)->EnableWindow(TRUE);
+			GetDlgItem(IDC_EDIT_SECTOR_SIZE)->EnableWindow(FALSE);
 			GetDlgItem(IDC_EDIT_PERCENT_SIZE)->EnableWindow(FALSE);
 		}
 		else
@@ -480,27 +481,10 @@ void CReedDlg::InvalidateControls()
 	double percent = double(_ttoi(m_szPercentSize))*0.01;
 	FILESIZE size = rec.m_nTotalSize;
 
-	if (m_nRadio==1 && !rec.m_bReadOnly)
+	if (rec.m_bReadOnly)
 	{
-		if (rec.m_nTotalSize>0)
-		{
-			int rec_size = int((double(rec.m_nTotalSize)*percent)/double(1024*1024));
-			int sec_size=4;
-			if (rec_size<1) rec_size = 1;
-			if (rec_size>10000) rec_size = 10000;
-			if (rec_size>10) sec_size=4;
-			if (rec_size>50) sec_size=8;
-			if (rec_size>100) sec_size=16;
-			if (rec_size>500) sec_size=32;
-			if (rec_size>1000) sec_size=64;
-			if (rec_size>2000) sec_size=128;
-			m_szRecSize.Format(_T("%d"),rec_size);
-			m_szSectorSize.Format(_T("%d"),sec_size);
-		}
-	}
-	else
-	{
-		double recs = _ttoi(m_szRecSize)*1024*1024;
+		double recs = _ttoi(m_szRecSize);
+		recs *= 1024.*1024.;
 		double tots = double(rec.m_nTotalSize);
 		if (recs>0 && tots>0)
 		{
@@ -508,10 +492,36 @@ void CReedDlg::InvalidateControls()
 			if (percent>100) percent=100;
 			m_szPercentSize.Format(_T("%d"), percent);
 		}
-
 	}
-	int recs = _ttoi(m_szRecSize)*1024*1024;
-	int ssize = _ttoi(m_szSectorSize)*1024;
+
+	int rec_size = _ttoi(m_szRecSize);
+
+	if (m_nRadio==1 && rec.m_nTotalSize>0)
+	{
+		rec_size = int((double(rec.m_nTotalSize)*percent)/double(1024*1024));
+	}
+	
+	if (!rec.m_bReadOnly)
+	{
+		int sec_size=4;
+		if (rec_size<1) rec_size = 1;
+		if (rec_size>10000) rec_size = 10000;
+		if (rec_size>10) sec_size=4;
+		if (rec_size>50) sec_size=8;
+		if (rec_size>100) sec_size=16;
+		if (rec_size>500) sec_size=32;
+		if (rec_size>1000) sec_size=64;
+		if (rec_size>2000) sec_size=128;
+		if (rec_size>4000) sec_size=256;
+		if (m_nRadio==1)
+			m_szRecSize.Format(_T("%d"),rec_size);
+		m_szSectorSize.Format(_T("%d"),sec_size);
+	}
+
+	__int64 recs = _ttoi(m_szRecSize);
+	recs *= 1024*1024;
+	__int64 ssize = _ttoi(m_szSectorSize);
+	ssize *= 1024;
 
 	if (ssize<recs)
 	{
@@ -755,7 +765,8 @@ void CReedDlg::OnBtnProtectFiles()
 	if (szProtectFile==_T(""))
 		return; 
 
-	m_nArgSize = _ttoi(m_szRecSize)*1024*1024;
+	m_nArgSize = _ttoi(m_szRecSize);
+	m_nArgSize*=1024*1024;
 	m_szArgFileName = szProtectFile;
 	RunAsync(trdProtectFiles);
 	
@@ -1530,3 +1541,8 @@ BOOL CReedDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		return CDialog::OnSetCursor(pWnd, nHitTest, message);
 }
 
+
+void CReedDlg::OnEnChangeEditRecSize()
+{
+	InvalidateControls();
+}
