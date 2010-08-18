@@ -104,7 +104,7 @@ EXSTYLE WS_EX_APPWINDOW
 CAPTION "Reed-Solomon Files Protection"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    GROUPBOX        " Files in Recovery Info ",IDC_STATIC,7,7,255,239
+    GROUPBOX        " Files to Protect/Recover",IDC_STATIC,7,7,255,239
     CONTROL         "List1",IDC_LIST_FILES,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,15,32,238,181
     PUSHBUTTON      "Add Files...",IDC_BTN_ADD,15,221,60,17
     PUSHBUTTON      "Remove Files",IDC_BTN_REMOVE,79,221,60,17
