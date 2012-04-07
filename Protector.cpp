@@ -808,7 +808,7 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 	FILESIZE pcnt=0;
 	if (g_DlgProgress!=NULL)
 	{
-		g_DlgProgress->m_szOperation=_T("Checking integirity of recovery info");
+		g_DlgProgress->m_szOperation=_T("Checking integrity of the recovery file");
 		g_DlgProgress->m_szFileName=szFileName;
 		g_DlgProgress->m_cProgress.SetRange(0,100);
 		g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);

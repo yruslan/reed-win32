@@ -1380,7 +1380,7 @@ void CReedDlg::OnComplete()
 		szProtectFile += _T("Directory.rcv");
 
 		m_szArgFileName = szProtectFile;
-		m_nArgSize = _ttoi(m_szRecSize)*1024*1024;
+		m_nArgSize = ((FILESIZE)_ttoi(m_szRecSize))*1024*1024;
 		int rc = RunAsync(trdProtectDir);
 
 		//InvalidateControls();
