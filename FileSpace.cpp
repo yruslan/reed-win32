@@ -16,7 +16,7 @@ CFileSpace::CFileSpace()
 	m_nTotalSize = 0;
 	m_nCurrentFile = -1;
 	m_nCurrentPos = 0;
-	m_nSectorSize = 32768;
+	m_nBlockSize = 32768;
 	m_bReadOnly = true;
 	m_nCurrentFilePos = 0;
 }
@@ -66,9 +66,9 @@ int CFileSpace::AddFile(LPCTSTR szFileName, FILESIZE use_size /*= 0*/, int ignor
 	m_arRealSizes.Add(file_size2);
 	m_arSizes.Add(file_size);
 
-	if (file_size % m_nSectorSize)
+	if (file_size % m_nBlockSize)
 	{
-		file_size += m_nSectorSize - (file_size % m_nSectorSize);
+		file_size += m_nBlockSize - (file_size % m_nBlockSize);
 	}
 	m_arIgnore.Add(ignore);
 
@@ -76,10 +76,10 @@ int CFileSpace::AddFile(LPCTSTR szFileName, FILESIZE use_size /*= 0*/, int ignor
 	return 0;
 }
 
-int CFileSpace::SetSectorSize(int sector_size)
+int CFileSpace::SetBlockSize(int block_size)
 {
-	if (sector_size<512) return -1;
-	m_nSectorSize = sector_size;
+	if (block_size<512) return -1;
+	m_nBlockSize = block_size;
 
 	FILESIZE size = 0;
 	m_nTotalSize = 0;
@@ -90,9 +90,9 @@ int CFileSpace::SetSectorSize(int sector_size)
 		if (i<m_arFiles.GetSize() && i<m_arSizes.GetCount())
 		{
 			size = m_arSizes.GetAt(i);
-			if (size % m_nSectorSize > 0)
+			if (size % m_nBlockSize > 0)
 			{
-				size += m_nSectorSize - (size % m_nSectorSize);
+				size += m_nBlockSize - (size % m_nBlockSize);
 			}
 			m_nTotalSize += size;
 		}		
@@ -101,9 +101,9 @@ int CFileSpace::SetSectorSize(int sector_size)
 	return 0;
 }
 
-int CFileSpace::GetSectorSize()
+int CFileSpace::GetBlockSize()
 {
-	return m_nSectorSize;
+	return m_nBlockSize;
 }
 
 FILESIZE CFileSpace::GetAllSize()
@@ -145,9 +145,9 @@ FILESIZE CFileSpace::GetPos()
 	return m_nCurrentPos;
 }
 
-FILESIZE CFileSpace::GetSector()
+FILESIZE CFileSpace::GetBlock()
 {
-	return int(m_nCurrentPos / m_nSectorSize);
+	return int(m_nCurrentPos / m_nBlockSize);
 }
 
 int CFileSpace::GetFileNumberAndPos(FILESIZE nPos, int &nFile, FILESIZE &nFilePos)
@@ -164,8 +164,8 @@ int CFileSpace::GetFileNumberAndPos(FILESIZE nPos, int &nFile, FILESIZE &nFilePo
 	while (cur_pos<=nPos)
 	{
 		FILESIZE size = m_arSizes.GetAt(i);
-		if (size % m_nSectorSize > 0)
-			size += m_nSectorSize - (size % m_nSectorSize);
+		if (size % m_nBlockSize > 0)
+			size += m_nBlockSize - (size % m_nBlockSize);
 
 		if (cur_pos+size<=nPos)
 		{
@@ -235,9 +235,9 @@ int CFileSpace::EnsurePathExist(LPCTSTR szFileName)
 	return 0;
 }
 
-int CFileSpace::SetSector(FILESIZE nSector, bool allow_writes=false)
+int CFileSpace::SetBlock(FILESIZE nBlock, bool allow_writes=false)
 {
-	FILESIZE desired_position = nSector*m_nSectorSize;
+	FILESIZE desired_position = nBlock*m_nBlockSize;
 	//if (desired_position == m_nCurrentPos && m_nCurrentFile>=0)	return 0;
 
 	int nFile;
@@ -329,11 +329,11 @@ int CFileSpace::SetSector(FILESIZE nSector, bool allow_writes=false)
 	return 0;
 }
 
-int CFileSpace::ReadSector(void *buf)
+int CFileSpace::ReadBlock(void *buf)
 {
 	size_t size = 0;
 
-	while (size < (size_t) m_nSectorSize)
+	while (size < (size_t) m_nBlockSize)
 	{
 		if (file!=NULL)
 		{
@@ -347,7 +347,7 @@ int CFileSpace::ReadSector(void *buf)
 				}
 				else
 				{
-					size = fread(buf, 1, m_nSectorSize, file);
+					size = fread(buf, 1, m_nBlockSize, file);
 					if (size == 0)
 					{
 						fclose(file);
@@ -355,12 +355,12 @@ int CFileSpace::ReadSector(void *buf)
 					}
 					else
 					{
-						if (size < (size_t) m_nSectorSize)
+						if (size < (size_t) m_nBlockSize)
 						{
-							memset(((char *)buf)+size, 0, m_nSectorSize - size);
-							size = m_nSectorSize;
+							memset(((char *)buf)+size, 0, m_nBlockSize - size);
+							size = m_nBlockSize;
 						}
-						m_nCurrentFilePos+=m_nSectorSize;
+						m_nCurrentFilePos+=m_nBlockSize;
 					}
 				}
 			}
@@ -382,12 +382,12 @@ int CFileSpace::ReadSector(void *buf)
 				}
 				else
 				{
-					size = (size_t) m_nSectorSize;
-					m_nCurrentFilePos+=m_nSectorSize;
+					size = (size_t) m_nBlockSize;
+					m_nCurrentFilePos+=m_nBlockSize;
 				}
 			}
 		}
-		if (size < (size_t) m_nSectorSize)
+		if (size < (size_t) m_nBlockSize)
 		{
 			int nFile;
 			FILESIZE nFilePos;
@@ -408,9 +408,9 @@ int CFileSpace::ReadSector(void *buf)
 				int ign = m_arIgnore.GetAt(nFile);
 				if (ign!=0)
 				{
-					memset(buf, 0, m_nSectorSize);
-					size = m_nSectorSize;
-					m_nCurrentFilePos+=m_nSectorSize;
+					memset(buf, 0, m_nBlockSize);
+					size = m_nBlockSize;
+					m_nCurrentFilePos+=m_nBlockSize;
 					m_bCurIgnored = true;
 					continue;
 				}
@@ -440,24 +440,24 @@ int CFileSpace::ReadSector(void *buf)
 				if (file == NULL && !m_bReadOnly) return E_FILESPACE_CANNOT_OPEN;
 				if (file == NULL && m_bReadOnly)
 				{
-					memset(buf, 0, m_nSectorSize);
-					size = m_nSectorSize;
-					m_nCurrentFilePos+=m_nSectorSize;
+					memset(buf, 0, m_nBlockSize);
+					size = m_nBlockSize;
+					m_nCurrentFilePos+=m_nBlockSize;
 				}
 			}
 			else
 			{
-				memset(buf, 0, m_nSectorSize);
-				size = m_nSectorSize;
-				m_nCurrentFilePos+=m_nSectorSize;
+				memset(buf, 0, m_nBlockSize);
+				size = m_nBlockSize;
+				m_nCurrentFilePos+=m_nBlockSize;
 			}
 		}
 	}
-	m_nCurrentPos+=m_nSectorSize;
+	m_nCurrentPos+=m_nBlockSize;
 	return 0;
 }
 
-int CFileSpace::WriteSector(void *buf)
+int CFileSpace::WriteBlock(void *buf)
 {
 	if (m_bReadOnly) return E_FILESPACE_NO_PERMISSION;
 
@@ -469,17 +469,17 @@ int CFileSpace::WriteSector(void *buf)
 	{
 		if (file!=NULL)
 		{
-			if (m_nCurrentFilePos + m_nSectorSize < fz)
+			if (m_nCurrentFilePos + m_nBlockSize < fz)
 			{
-				to_write = m_nSectorSize;
+				to_write = m_nBlockSize;
 			}
 			else
 			{
 				to_write = (size_t) (fz - m_nCurrentFilePos);
 				if (to_write <= 0)
 				{
-					FILESIZE sector = m_nCurrentPos / m_nSectorSize;
-					int rc = SetSector(sector, true);
+					FILESIZE block = m_nCurrentPos / m_nBlockSize;
+					int rc = SetBlock(block, true);
 					if (rc!=0) return rc;
 					continue;
 				}
@@ -492,15 +492,15 @@ int CFileSpace::WriteSector(void *buf)
 			}
 			else
 			{
-				m_nCurrentPos+=m_nSectorSize;
-				m_nCurrentFilePos+=m_nSectorSize;
+				m_nCurrentPos+=m_nBlockSize;
+				m_nCurrentFilePos+=m_nBlockSize;
 				bWritten = true;
 			}
 		}
 		else
 		{
-			FILESIZE sector = m_nCurrentPos / m_nSectorSize;
-			int rc = SetSector(sector, true);
+			FILESIZE block = m_nCurrentPos / m_nBlockSize;
+			int rc = SetBlock(block, true);
 			if (rc!=0) return rc;
 			continue;
 		}

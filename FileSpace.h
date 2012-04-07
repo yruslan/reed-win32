@@ -17,8 +17,8 @@ public:
 	CFileSpace();
 	~CFileSpace();
 
-	int SetSectorSize(int sector_size);
-	int GetSectorSize();
+	int SetBlockSize(int block_size);
+	int GetBlockSize();
 
 	int EnsurePathExist(LPCTSTR szFileName);
 
@@ -29,11 +29,11 @@ public:
 
 	bool eof();
 	FILESIZE GetPos();
-	FILESIZE GetSector();
-	int SetSector(FILESIZE nSector, bool allow_writes/*=false*/);
+	FILESIZE GetBlock();
+	int SetBlock(FILESIZE nBlock, bool allow_writes/*=false*/);
 
-	int ReadSector(void *buf);
-	int WriteSector(void *buf);
+	int ReadBlock(void *buf);
+	int WriteBlock(void *buf);
 
 	void Close();
 
@@ -51,7 +51,7 @@ private:
 	CArray<FILESIZE> m_arRealSizes;
 	CArray<int>	m_arIgnore;
 
-	int m_nSectorSize;
+	int m_nBlockSize;
 	int m_nFilesCount;
 	FILESIZE m_nTotalSize;
 

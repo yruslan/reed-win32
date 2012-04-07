@@ -16,9 +16,9 @@
 #define IDC_BTN_PROTECT_DIRECTORY       1006
 #define IDC_BTN_LOCATE                  1007
 #define IDC_EDIT_REC_SIZE               1008
-#define IDC_EDIT_SECTOR_SIZE            1009
+#define IDC_EDIT_BLOCK_SIZE            1009
 #define IDC_EDIT_PERCENT_SIZE           1010
-#define IDC_STATIC_SECTOR_COUNT         1011
+#define IDC_STATIC_BLOCK_COUNT         1011
 #define IDC_BTN_CALCULATE               1012
 #define IDC_BTN_RECOVER                 1013
 #define IDC_LIST_FILES                  1014

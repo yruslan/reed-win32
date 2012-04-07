@@ -71,8 +71,8 @@ CReedDlg::CReedDlg(CWnd* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CReedDlg)
 	m_szPercentSize = _T("10");
 	m_szRecSize = _T("100");
-	m_szSectorSize = _T("32");
-	m_szCntSectors = _T("32000");
+	m_szBlockSize = _T("32");
+	m_szCntBlocks = _T("32000");
 	m_szTotalSize = _T("");
 	m_szRecoverPath = _T("");
 	m_nRadio = 1;
@@ -112,10 +112,10 @@ void CReedDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RADIO1, m_nRadio);
 	DDX_Radio(pDX, IDC_RADIO3, m_nRadio3);
 	DDV_MaxChars(pDX, m_szRecSize, 4);
-	DDX_Text(pDX, IDC_EDIT_SECTOR_SIZE, m_szSectorSize);
+	DDX_Text(pDX, IDC_EDIT_BLOCK_SIZE, m_szBlockSize);
 	DDX_Text(pDX, IDC_EDIT_RECOVER_PATH, m_szRecoverPath);
-	//DDV_MaxChars(pDX, m_szSectorSize, 3);
-	DDX_Text(pDX, IDC_STATIC_SECTOR_COUNT, m_szCntSectors);
+	//DDV_MaxChars(pDX, m_szBlockSize, 3);
+	DDX_Text(pDX, IDC_STATIC_BLOCK_COUNT, m_szCntBlocks);
 	DDX_Text(pDX, IDC_STATIC_TOTAL_SIZE, m_szTotalSize);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_CHK_QUADRO, m_bQuadro);
@@ -140,7 +140,7 @@ BEGIN_MESSAGE_MAP(CReedDlg, CDialog)
 	ON_BN_CLICKED(IDC_BTN_CHECK_THIS, &CReedDlg::OnBtnCheckThis)
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST_FILES, &CReedDlg::OnLvnColumnclickFilesTab)
 	ON_EN_KILLFOCUS(IDC_EDIT_REC_SIZE, &CReedDlg::OnKillfocusEditRecSize)
-	ON_EN_KILLFOCUS(IDC_EDIT_SECTOR_SIZE, &CReedDlg::OnKillfocusEditSectorSize)
+	ON_EN_KILLFOCUS(IDC_EDIT_BLOCK_SIZE, &CReedDlg::OnKillfocusEditBlockSize)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_RADIO1, &CReedDlg::OnBnClickedRadio1)
 	ON_BN_CLICKED(IDC_RADIO2, &CReedDlg::OnBnClickedRadio2)
@@ -156,9 +156,9 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CReedDlg message handlers
 
-void NumbersToBytes(int sectors, int sector_size, CString &msg)
+void NumbersToBytes(int blocks, int block_size, CString &msg)
 {
-	unsigned __int64 bytes = sectors*sector_size;
+	unsigned __int64 bytes = blocks*block_size;
 
 	if (bytes<10*1024)
 	{
@@ -221,7 +221,7 @@ BOOL CReedDlg::OnInitDialog()
 
 	m_fntBold.CreateFontIndirect(&logfont);
 	GetDlgItem(IDC_STATIC_TOTAL_SIZE)->SetFont(&m_fntBold, TRUE);
-	//GetDlgItem(IDC_STATIC_SECTOR_COUNT)->SetFont(&m_fntBold, TRUE);
+	//GetDlgItem(IDC_STATIC_BLOCK_COUNT)->SetFont(&m_fntBold, TRUE);
 	
 	CSize sz; 
 	sz = dc.GetTextExtent(_T(" File Name (no path) - ")); 
@@ -397,7 +397,7 @@ void CReedDlg::InvalidateControls()
 		//GetDlgItem(IDC_BTN_LOCATE)->EnableWindow(FALSE);
 
 		GetDlgItem(IDC_EDIT_REC_SIZE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_EDIT_SECTOR_SIZE)->EnableWindow(FALSE);
+		GetDlgItem(IDC_EDIT_BLOCK_SIZE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EDIT_PERCENT_SIZE)->EnableWindow(FALSE);
 		//GetDlgItem(IDC_BTN_CALCULATE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BTN_PROTECT_FILES)->EnableWindow(FALSE);
@@ -447,13 +447,13 @@ void CReedDlg::InvalidateControls()
 		if (m_nRadio==0)
 		{
 			GetDlgItem(IDC_EDIT_REC_SIZE)->EnableWindow(TRUE);
-			GetDlgItem(IDC_EDIT_SECTOR_SIZE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_EDIT_BLOCK_SIZE)->EnableWindow(FALSE);
 			GetDlgItem(IDC_EDIT_PERCENT_SIZE)->EnableWindow(FALSE);
 		}
 		else
 		{
 			GetDlgItem(IDC_EDIT_REC_SIZE)->EnableWindow(FALSE);
-			GetDlgItem(IDC_EDIT_SECTOR_SIZE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_EDIT_BLOCK_SIZE)->EnableWindow(FALSE);
 			GetDlgItem(IDC_EDIT_PERCENT_SIZE)->EnableWindow(TRUE);
 		}
 		//GetDlgItem(IDC_BTN_CALCULATE)->EnableWindow(TRUE);
@@ -476,7 +476,7 @@ void CReedDlg::InvalidateControls()
 		GetDlgItem(IDC_RADIO4)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EDIT_RECOVER_PATH)->EnableWindow(FALSE);
 	}
-	//Calc Sector Count
+	//Calc Block Count
 	int files = rec.m_arFiles.GetSize();
 	double percent = double(_ttoi(m_szPercentSize))*0.01;
 	FILESIZE size = rec.m_nTotalSize;
@@ -503,33 +503,34 @@ void CReedDlg::InvalidateControls()
 	
 	if (!rec.m_bReadOnly)
 	{
-		int sec_size=4;
+		int block_size=4;
 		if (rec_size<1) rec_size = 1;
 		if (rec_size>10000) rec_size = 10000;
-		if (rec_size>10) sec_size=4;
-		if (rec_size>50) sec_size=8;
-		if (rec_size>100) sec_size=16;
-		if (rec_size>500) sec_size=32;
-		if (rec_size>1000) sec_size=64;
-		if (rec_size>2000) sec_size=128;
-		if (rec_size>4000) sec_size=256;
+		if (rec_size>10) block_size=4;
+		if (rec_size>50) block_size=8;
+		if (rec_size>100) block_size=16;
+		if (rec_size>500) block_size=32;
+		if (rec_size>1000) block_size=64;
+		if (rec_size>2000) block_size=128;
+		if (rec_size>4000) block_size=256;
 		if (m_nRadio==1)
 			m_szRecSize.Format(_T("%d"),rec_size);
-		m_szSectorSize.Format(_T("%d"),sec_size);
+		m_szBlockSize.Format(_T("%d"),block_size);
+		rec.m_nRecoveryBlockSize = block_size;
 	}
 
 	__int64 recs = _ttoi(m_szRecSize);
 	recs *= 1024*1024;
-	__int64 ssize = _ttoi(m_szSectorSize);
+	__int64 ssize = _ttoi(m_szBlockSize);
 	ssize *= 1024;
 
 	if (ssize<recs)
 	{
-		m_szCntSectors.Format(_T("%d"), recs/ssize);
+		m_szCntBlocks.Format(_T("%d"), recs/ssize);
 	}
 	else
 	{
-		m_szCntSectors = _T("!wrong!");
+		m_szCntBlocks = _T("!wrong!");
 	}
 	m_szTotalSize.Format(_T("%u MB in %d files"), (unsigned int)(size/(1024*1024)), files);
 	UpdateData(FALSE);
@@ -948,7 +949,7 @@ void CReedDlg::OnKillfocusEditRecSize()
 	InvalidateControls();
 }
 
-void CReedDlg::OnKillfocusEditSectorSize() 
+void CReedDlg::OnKillfocusEditBlockSize() 
 {
 	InvalidateControls();
 }
@@ -1329,7 +1330,7 @@ void CReedDlg::OnComplete()
 			return;
 
 		m_szRecSize.Format(_T("%d"), rec.m_nRecoverySize/(1024*1024));
-		m_szSectorSize.Format(_T("%d"), rec.m_nRecoverySectorSize/1024);
+		m_szBlockSize.Format(_T("%d"), rec.m_nRecoveryBlockSize/1024);
 		m_szPercentSize.Format(_T("%d"), rec.m_nRecoverySize/rec.m_nTotalSize);
 		UpdateData(FALSE);
 	}
@@ -1343,17 +1344,18 @@ void CReedDlg::OnComplete()
 			{
 				double percent = double(_ttoi(m_szPercentSize))*0.01;
 				int rec_size = int((double(rec.m_nTotalSize)*percent)/double(1024*1024));
-				int sec_size=4;
+				int block_size=4;
 				if (rec_size<1) rec_size = 1;
 				if (rec_size>10000) rec_size = 10000;
-				if (rec_size>10) sec_size=4;
-				if (rec_size>50) sec_size=8;
-				if (rec_size>100) sec_size=16;
-				if (rec_size>500) sec_size=32;
-				if (rec_size>1000) sec_size=64;
-				if (rec_size>2000) sec_size=128;
+				if (rec_size>10) block_size=4;
+				if (rec_size>50) block_size=8;
+				if (rec_size>100) block_size=16;
+				if (rec_size>500) block_size=32;
+				if (rec_size>1000) block_size=64;
+				if (rec_size>2000) block_size=128;
 				m_szRecSize.Format(_T("%d"),rec_size);
-				m_szSectorSize.Format(_T("%d"),sec_size);
+				m_szBlockSize.Format(_T("%d"),block_size);
+				rec.m_nRecoveryBlockSize = block_size;
 			}
 			UpdateData(FALSE);
 		}
@@ -1468,7 +1470,7 @@ void CReedDlg::OnComplete()
 			if (m_bCheckNotAll)
 			{
 				CString s1;
-				NumbersToBytes(rec.m_nCntRecoverable, rec.m_nRecoverySectorSize, s1);
+				NumbersToBytes(rec.m_nCntRecoverable, rec.m_nRecoveryBlockSize, s1);
 				CString msg;
 				msg.Format(_T("Found CRC Errors! To recover files you'll need to run a FULL check."), s1);
 				MessageBox(msg,_T("Warning"), MB_ICONEXCLAMATION);
@@ -1480,7 +1482,7 @@ void CReedDlg::OnComplete()
 					if (rec.m_nCntNotRecoverable==0)
 					{
 						CString s1;
-						NumbersToBytes(rec.m_nCntRecoverable, rec.m_nRecoverySectorSize, s1);
+						NumbersToBytes(rec.m_nCntRecoverable, rec.m_nRecoveryBlockSize, s1);
 						CString msg;
 						msg.Format(_T("Found %s of incorrect data. All are recovarable!"), s1);
 						MessageBox(msg,_T("Warning"), MB_ICONEXCLAMATION);
@@ -1488,9 +1490,9 @@ void CReedDlg::OnComplete()
 					else
 					{
 						CString s1;
-						NumbersToBytes(rec.m_nCntRecoverable, rec.m_nRecoverySectorSize, s1);
+						NumbersToBytes(rec.m_nCntRecoverable, rec.m_nRecoveryBlockSize, s1);
 						CString s2;
-						NumbersToBytes(rec.m_nCntNotRecoverable, rec.m_nRecoverySectorSize, s2);
+						NumbersToBytes(rec.m_nCntNotRecoverable, rec.m_nRecoveryBlockSize, s2);
 						CString msg;
 						msg.Format(_T("Found %s recovarable and %s unrecoverable data!"), s1, s2);
 						MessageBox(msg,_T("Warning"), MB_ICONEXCLAMATION);

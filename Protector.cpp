@@ -40,11 +40,11 @@ CProtector::CProtector()
 	m_szRecovery = NULL;
 	m_npattern = NULL;
 	m_szRestSum = NULL;
-	m_nRecoverySectorSize = SECTOR_SIZE;
+	m_nRecoveryBlockSize = BLOCK_SIZE;
 	m_nRecoverySize = 10485760;
-	m_nCntSectors = 0;
-	m_nCurrentSector = 0;
-	m_nCurrentSectorA = 0;
+	m_nCntBlocks = 0;
+	m_nCurrentBlock = 0;
+	m_nCurrentBlockA = 0;
 	m_nCntRecoverable = 0;
 	m_nCntNotRecoverable = 0;
 	m_bReadOnly = false;
@@ -93,11 +93,11 @@ void CProtector::Clear()
 		m_szRecovery = NULL;
 	}
 	m_blbCRC.SetSize(0);
-	m_nRecoverySectorSize = SECTOR_SIZE;
+	m_nRecoveryBlockSize = BLOCK_SIZE;
 	m_nRecoverySize = 10485760;
-	m_nCntSectors = 0;
-	m_nCurrentSector = 0;
-	m_nCurrentSectorA = 0;
+	m_nCntBlocks = 0;
+	m_nCurrentBlock = 0;
+	m_nCurrentBlockA = 0;
 	m_nCntRecoverable = 0;
 	m_nCntNotRecoverable = 0;
 	m_bReadOnly = false;
@@ -206,25 +206,25 @@ int CProtector::GetListOfFiles(LPCTSTR szDirectory)
 /*
 int CProtector::CreateSolidRecovery(int size)
 {
-	if (size<3*m_nRecoverySectorSize)
+	if (size<3*m_nRecoveryBlockSize)
 		return -1; //Too small size
 
 	if (m_arFiles.GetSize()==0)
 		return -2; //No files!
 
-	//Calc Numsectors
-	if (size % m_nRecoverySectorSize == 0)
+	//Calc Numblocks
+	if (size % m_nRecoveryBlockSize == 0)
 	{
-		m_nCntSectors = size / m_nRecoverySectorSize;
+		m_nCntBlocks = size / m_nRecoveryBlockSize;
 		m_nRecoverySize = size;
 	}
 	else
 	{
-		m_nCntSectors = size / m_nRecoverySectorSize + 1;
-		m_nRecoverySize = size + m_nRecoverySectorSize - (size % m_nRecoverySectorSize);
+		m_nCntBlocks = size / m_nRecoveryBlockSize + 1;
+		m_nRecoverySize = size + m_nRecoveryBlockSize - (size % m_nRecoveryBlockSize);
 	}
-	m_nCurrentSector = 0;
-	m_nCurrentSectorA = 0;
+	m_nCurrentBlock = 0;
+	m_nCurrentBlockA = 0;
 
 	if (m_szRecovery!=NULL)
 		delete [] m_szRecovery;
@@ -244,7 +244,7 @@ int CProtector::CreateSolidRecovery(int size)
 
 int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 {
-	if (size<3*m_nRecoverySectorSize)
+	if (size<3*m_nRecoveryBlockSize)
 		return E_SMALL_SIZE; //Too small size
 
 	if (m_arFiles.GetSize()==0)
@@ -253,19 +253,19 @@ int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 	FILE *f = _tfopen (szFileName, _T("wb"));
 	if (f==NULL) return E_FILE_CANNOT_WRITE;
 
-	//Calc Numsectors
-	if (size % m_nRecoverySectorSize == 0)
+	//Calc Numblocks
+	if (size % m_nRecoveryBlockSize == 0)
 	{
-		m_nCntSectors = int(size / m_nRecoverySectorSize);
+		m_nCntBlocks = int(size / m_nRecoveryBlockSize);
 		m_nRecoverySize = size;
 	}
 	else
 	{
-		m_nCntSectors = int(size / m_nRecoverySectorSize + 1);
-		m_nRecoverySize = size + m_nRecoverySectorSize - (size % m_nRecoverySectorSize);
+		m_nCntBlocks = int(size / m_nRecoveryBlockSize + 1);
+		m_nRecoverySize = size + m_nRecoveryBlockSize - (size % m_nRecoveryBlockSize);
 	}
-	m_nCurrentSector = 0;
-	m_nCurrentSectorA = 0;
+	m_nCurrentBlock = 0;
+	m_nCurrentBlockA = 0;
 
 	//Writing Header
 	unsigned int uCRC = 0;
@@ -280,13 +280,13 @@ int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 	uCRC = Get_CRC(&cnt,sizeof(cnt), uCRC);	
 	fwrite(&m_nRecoverySize,sizeof(m_nRecoverySize),1,f);
 	uCRC = Get_CRC(&m_nRecoverySize,sizeof(m_nRecoverySize), uCRC);
-	fwrite(&m_nRecoverySectorSize,sizeof(m_nRecoverySectorSize),1,f);
-	uCRC = Get_CRC(&m_nRecoverySectorSize,sizeof(m_nRecoverySectorSize), uCRC);
+	fwrite(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize),1,f);
+	uCRC = Get_CRC(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize), uCRC);
 
 	int nSegSize = SEG_SIZE*1024*1024;
-	if (nSegSize % m_nRecoverySectorSize!=0)
+	if (nSegSize % m_nRecoveryBlockSize!=0)
 	{
-		nSegSize += m_nRecoverySectorSize - (nSegSize % m_nRecoverySectorSize);
+		nSegSize += m_nRecoveryBlockSize - (nSegSize % m_nRecoveryBlockSize);
 	}
 	int nSegments = 1;
 	if (nSegSize > m_nRecoverySize)
@@ -303,7 +303,7 @@ int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 	m_szRecovery = new char [nSegSize];
 	if (m_szRecovery==NULL)
 		return E_WRONG_OUT_OF_MEMORY;
-	char *buf = new char [m_nRecoverySectorSize];
+	char *buf = new char [m_nRecoveryBlockSize];
 	if (buf==NULL)
 	{
 		delete [] m_szRecovery;
@@ -358,34 +358,34 @@ int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 
 		while (offset<fs.GetAllSize())
 		{
-			FILESIZE sectorA = offset / m_nRecoverySectorSize;
-			fs.SetSector(sectorA, false);
+			FILESIZE blockA = offset / m_nRecoveryBlockSize;
+			fs.SetBlock(blockA, false);
 			int to_read = int(offset2-offset);
 			int rec_size = to_read;
-			int sector=0;
+			int block=0;
 
 			while (to_read>0)
 			{
-				fs.ReadSector(buf);
-				if (sector==0)
+				fs.ReadBlock(buf);
+				if (block==0)
 					int kk=1;
-				_xoradd(m_szRecovery + sector*m_nRecoverySectorSize, buf, m_nRecoverySectorSize);
+				_xoradd(m_szRecovery + block*m_nRecoveryBlockSize, buf, m_nRecoveryBlockSize);
 
-				UINT crc = Get_CRC(buf, m_nRecoverySectorSize);
+				UINT crc = Get_CRC(buf, m_nRecoveryBlockSize);
 				m_blbCRC << crc;
 
-				if (to_read>=m_nRecoverySectorSize)				
-					to_read-=m_nRecoverySectorSize;
+				if (to_read>=m_nRecoveryBlockSize)				
+					to_read-=m_nRecoveryBlockSize;
 				else
 					return 500;
-				sector++;
+				block++;
 #ifdef _INSIDE_MFC_APP
 				if (pcnt % 1000 == 0 && g_DlgProgress!=NULL)
 				{
 					int percent = 0;
 					if (fs.GetAllSize()>0)
 					{
-						percent = int(double(100*pcnt*m_nRecoverySectorSize)/double(fs.GetAllSize()));
+						percent = int(double(100*pcnt*m_nRecoveryBlockSize)/double(fs.GetAllSize()));
 						if (percent>100 || percent<0)
 							percent = 0;
 					}
@@ -578,8 +578,8 @@ int CProtector::SaveRecovery(LPCSTR szFileName)
 	fwrite(&m_nRecoverySize,sizeof(m_nRecoverySize),1,f);
 	uCRC = Get_CRC(&m_nRecoverySize,sizeof(m_nRecoverySize), uCRC);
 
-	fwrite(&m_nRecoverySectorSize,sizeof(m_nRecoverySectorSize),1,f);
-	uCRC = Get_CRC(&m_nRecoverySectorSize,sizeof(m_nRecoverySectorSize), uCRC);
+	fwrite(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize),1,f);
+	uCRC = Get_CRC(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize), uCRC);
 
 	fwrite(&siz2,sizeof(siz2),1,f);
 	uCRC = Get_CRC(&siz2,sizeof(siz2), uCRC);
@@ -701,8 +701,8 @@ int CProtector::LoadRecovery(LPCSTR szFileName)
 	if (cnt<=0) return -3;
 	fread(&m_nRecoverySize,sizeof(m_nRecoverySize),1,f);
 	if (m_nRecoverySize<=0) return -3;
-	fread(&m_nRecoverySectorSize,sizeof(m_nRecoverySectorSize),1,f);
-	if (m_nRecoverySectorSize<=0) return -3;
+	fread(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize),1,f);
+	if (m_nRecoveryBlockSize<=0) return -3;
 	fread(&siz2,sizeof(siz2),1,f);
 	if (siz2<=0) return -3;
 
@@ -713,7 +713,7 @@ int CProtector::LoadRecovery(LPCSTR szFileName)
 		fread(m_szPath, sizeof(char),ll+1,f);
 	}
 
-	m_nCntSectors = m_nRecoverySize/m_nRecoverySectorSize;
+	m_nCntBlocks = m_nRecoverySize/m_nRecoveryBlockSize;
 
 	//Create buffers
 	if (m_szRecovery!=NULL)
@@ -901,8 +901,8 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 	if (cnt<=0) return E_FORMAT_ERROR;
 	fread(&m_nRecoverySize,sizeof(m_nRecoverySize),1,f);
 	if (m_nRecoverySize<=0) return E_FORMAT_ERROR;
-	fread(&m_nRecoverySectorSize,sizeof(m_nRecoverySectorSize),1,f);
-	if (m_nRecoverySectorSize<=0) return E_FORMAT_ERROR;
+	fread(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize),1,f);
+	if (m_nRecoveryBlockSize<=0) return E_FORMAT_ERROR;
 
 	FILESIZE xx = _ftelli64(f);
 
@@ -916,7 +916,7 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 	fread(&ll, sizeof(ll),1,f);
 	fread(m_szPath, sizeof(TCHAR),ll,f);
 
-	m_nCntSectors = int(m_nRecoverySize/m_nRecoverySectorSize);
+	m_nCntBlocks = int(m_nRecoverySize/m_nRecoveryBlockSize);
 
 	//Create buffers
 //	if (m_szRecovery!=NULL)
@@ -1034,14 +1034,14 @@ int CProtector::Check()
 		return -2;
 	memset(m_szRestSum, 0, m_nRecoverySize);
 
-	m_nCurrentSector = 0;
-	m_nCurrentSectorA = 0;
+	m_nCurrentBlock = 0;
+	m_nCurrentBlockA = 0;
 	m_blbCRC.ResetIndex();
 
-	m_npattern = new t_pattern[m_nCntSectors];
+	m_npattern = new t_pattern[m_nCntBlocks];
 	if (m_npattern==NULL)
 		return -2;
-	memset(m_npattern, 0, sizeof(t_pattern)*m_nCntSectors);
+	memset(m_npattern, 0, sizeof(t_pattern)*m_nCntBlocks);
 
 	int i;
 	for (i=0; i<m_arFiles.GetSize(); i++)
@@ -1055,7 +1055,7 @@ int CProtector::Check()
 	m_nCntRecoverable=0;
 	m_nCntNotRecoverable=0;
 
-	for (i=0; i<m_nCntSectors; i++)
+	for (i=0; i<m_nCntBlocks; i++)
 	{
 		if (m_npattern[i].size!=0)
 		{
@@ -1123,9 +1123,9 @@ int CProtector::Check2()
 	}
 
 	int nSegSize = SEG_SIZE*1024*1024;
-	if (nSegSize % m_nRecoverySectorSize!=0)
+	if (nSegSize % m_nRecoveryBlockSize!=0)
 	{
-		nSegSize += m_nRecoverySectorSize - (nSegSize % m_nRecoverySectorSize);
+		nSegSize += m_nRecoveryBlockSize - (nSegSize % m_nRecoveryBlockSize);
 	}
 	int nSegments = 1;
 	if (nSegSize > m_nRecoverySize)
@@ -1135,7 +1135,7 @@ int CProtector::Check2()
 		nSegments = int(m_nRecoverySize / nSegSize);
 		if (m_nRecoverySize % nSegSize > 0) nSegments++;
 	}
-	int nSectorsPerSeg = nSegSize / m_nRecoverySectorSize;
+	int nBlocksPerSeg = nSegSize / m_nRecoveryBlockSize;
 
 	if (m_szTempFile==_T(""))
 	{
@@ -1149,13 +1149,13 @@ int CProtector::Check2()
 
 	m_blbCRC.ResetIndex();
 
-	m_npattern = new t_pattern[m_nCntSectors];
+	m_npattern = new t_pattern[m_nCntBlocks];
 
 	if (m_npattern==NULL)
 		return E_WRONG_OUT_OF_MEMORY;
-	memset(m_npattern, 0, sizeof(t_pattern)*m_nCntSectors);
+	memset(m_npattern, 0, sizeof(t_pattern)*m_nCntBlocks);
 
-	char *buf = new char [m_nRecoverySectorSize];
+	char *buf = new char [m_nRecoveryBlockSize];
 	if (buf==NULL)
 	{
 		delete [] m_szRestSum;
@@ -1293,17 +1293,17 @@ int CProtector::Check2()
 
 		while (offset<fs.GetAllSize())
 		{
-			FILESIZE sectorA = offset / m_nRecoverySectorSize;
-			fs.SetSector(sectorA, false);
+			FILESIZE blockA = offset / m_nRecoveryBlockSize;
+			fs.SetBlock(blockA, false);
 			int to_read = int(offset2-offset);
 			int rec_size = to_read;
-			int sector=0;
+			int block=0;
 
 			while (to_read>0)
 			{
-				fs.ReadSector(buf);
+				fs.ReadBlock(buf);
 				UINT crc = 0;
-				if (!fs.isIgnored()) crc = Get_CRC(buf, m_nRecoverySectorSize);
+				if (!fs.isIgnored()) crc = Get_CRC(buf, m_nRecoveryBlockSize);
 				UINT crc2;
 				m_blbCRC >> crc2;
 
@@ -1311,17 +1311,17 @@ int CProtector::Check2()
 				{
 					if (crc==crc2)
 					{
-						_xoradd(m_szRestSum + sector*m_nRecoverySectorSize, buf, m_nRecoverySectorSize);
+						_xoradd(m_szRestSum + block*m_nRecoveryBlockSize, buf, m_nRecoveryBlockSize);
 					}
 					else
 					{
 						CString szFN;
 						int f = fs.GetCurrentFile(szFN);
-						int sc = nSectorsPerSeg*segment+sector;
+						int sc = nBlocksPerSeg*segment+block;
 						if (m_npattern[sc].size==0)
 						{
-							m_npattern[sc].sector = sectorA + sector;
-							m_npattern[sc].size = m_nRecoverySectorSize;
+							m_npattern[sc].block = blockA + block;
+							m_npattern[sc].size = m_nRecoveryBlockSize;
 							m_npattern[sc].file = f;
 							t_FileInfo fi = m_arFiles.GetAt(f);
 							fi.errors++;
@@ -1353,17 +1353,17 @@ int CProtector::Check2()
 								fi.status=7;
 
 							m_npattern[sc].file++;											 
-							int sc = nSectorsPerSeg*segment+sector;
+							int sc = nBlocksPerSeg*segment+block;
 							m_npattern[sc].size=-1;
 						}
 					}
 				}
 
-				if (to_read>=m_nRecoverySectorSize)				
-					to_read-=m_nRecoverySectorSize;
+				if (to_read>=m_nRecoveryBlockSize)				
+					to_read-=m_nRecoveryBlockSize;
 				else
 					return 500;
-				sector++;
+				block++;
 
 #ifdef _INSIDE_MFC_APP
 				if (pcnt % 1000 == 0 && g_DlgProgress!=NULL)
@@ -1371,7 +1371,7 @@ int CProtector::Check2()
 					int percent = 0;
 					if (fs.GetAllSize()>0)
 					{
-						percent = int(double(100*pcnt*m_nRecoverySectorSize)/double(fs.GetAllSize()));
+						percent = int(double(100*pcnt*m_nRecoveryBlockSize)/double(fs.GetAllSize()));
 						if (percent>100 || percent<0)
 							percent = 0;
 					}
@@ -1448,7 +1448,7 @@ int CProtector::Check2()
 	m_nCntNotRecoverable=0;
 
 	int i;
-	for (i=0; i<m_nCntSectors; i++)
+	for (i=0; i<m_nCntBlocks; i++)
 	{
 		if (m_npattern[i].size!=0)
 		{
@@ -1500,11 +1500,11 @@ int CProtector::Recover()
 	if (m_nCntRecoverable==0)
 		return -1;
 
-	m_nCurrentSector=0;
-	m_nCurrentSectorA=0;
+	m_nCurrentBlock=0;
+	m_nCurrentBlockA=0;
 	
-	char *buf = new char [m_nRecoverySectorSize];
-	char *buf_rec = new char [m_nRecoverySectorSize];
+	char *buf = new char [m_nRecoveryBlockSize];
+	char *buf_rec = new char [m_nRecoveryBlockSize];
 
 	for (file=0; file<m_arFiles.GetSize(); file++)
 	{
@@ -1525,45 +1525,45 @@ int CProtector::Recover()
 
 		while (to_read>0)
 		{
-			if (m_npattern[m_nCurrentSector].size<0)
+			if (m_npattern[m_nCurrentBlock].size<0)
 				nStatus=2;
 
-			if (m_npattern[m_nCurrentSector].size>0 && m_npattern[m_nCurrentSector].sector == m_nCurrentSectorA)
+			if (m_npattern[m_nCurrentBlock].size>0 && m_npattern[m_nCurrentBlock].block == m_nCurrentBlockA)
 			{
-				//This sector needs recover
-				memset(buf_rec,0,m_nRecoverySectorSize);
-				_xoradd(buf_rec, m_szRecovery+m_nCurrentSector*m_nRecoverySectorSize, m_nRecoverySectorSize);
-				_xoradd(buf_rec, m_szRestSum+m_nCurrentSector*m_nRecoverySectorSize, m_nRecoverySectorSize);
+				//This block needs recover
+				memset(buf_rec,0,m_nRecoveryBlockSize);
+				_xoradd(buf_rec, m_szRecovery+m_nCurrentBlock*m_nRecoveryBlockSize, m_nRecoveryBlockSize);
+				_xoradd(buf_rec, m_szRestSum+m_nCurrentBlock*m_nRecoveryBlockSize, m_nRecoveryBlockSize);
 				
-				fwrite(buf_rec, sizeof(char), m_npattern[m_nCurrentSector].size, f);	
-				if (to_read>=m_npattern[m_nCurrentSector].size)
-					to_read-=m_npattern[m_nCurrentSector].size;
+				fwrite(buf_rec, sizeof(char), m_npattern[m_nCurrentBlock].size, f);	
+				if (to_read>=m_npattern[m_nCurrentBlock].size)
+					to_read-=m_npattern[m_nCurrentBlock].size;
 				else
 					to_read=0;
 			}
 			else
 				if (!feof(f))
 				{
-					int size = fread(buf, sizeof(char), m_nRecoverySectorSize, f);
+					int size = fread(buf, sizeof(char), m_nRecoveryBlockSize, f);
 					if (size==0)
 						continue;
-					if (to_read>=m_nRecoverySectorSize)
-						to_read-=m_nRecoverySectorSize;
+					if (to_read>=m_nRecoveryBlockSize)
+						to_read-=m_nRecoveryBlockSize;
 					else
 						to_read=0;
 				}
 				else
 				{
-					if (to_read>=m_nRecoverySectorSize)
-						to_read-=m_nRecoverySectorSize;
+					if (to_read>=m_nRecoveryBlockSize)
+						to_read-=m_nRecoveryBlockSize;
 					else
 						to_read=0;
 				}
 
-			m_nCurrentSector++;
-			m_nCurrentSectorA++;
-			if (m_nCurrentSector>=m_nCntSectors)
-				m_nCurrentSector=0;
+			m_nCurrentBlock++;
+			m_nCurrentBlockA++;
+			if (m_nCurrentBlock>=m_nCntBlocks)
+				m_nCurrentBlock=0;
 
 		}
 		fclose(f);
@@ -1599,9 +1599,9 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 	FILE *fRec = _tfopen (m_szRecFileName, _T("rb"));
 	if (fRec==NULL) return E_FILE_NOT_OPENS;
 
-	char *buf_rec = new char [m_nRecoverySectorSize];
-	char *buf_sum = new char [m_nRecoverySectorSize];
-	char *buf_file = new char [m_nRecoverySectorSize];
+	char *buf_rec = new char [m_nRecoveryBlockSize];
+	char *buf_sum = new char [m_nRecoveryBlockSize];
+	char *buf_file = new char [m_nRecoveryBlockSize];
 
 	int i; 
 	CFileSpace fs;
@@ -1701,50 +1701,50 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 		//g_DlgProgress->RedrawWindow();
 	}
 #endif
-	for (i=0; i<m_nCntSectors; i++)
+	for (i=0; i<m_nCntBlocks; i++)
 	{
 		if (m_npattern[i].size>0)
 		{
-			FILESIZE sectorA = m_npattern[i].sector;
+			FILESIZE blockA = m_npattern[i].block;
 
 			int nFile=0;
 			FILESIZE nPos=0;
-			int fok = fs.GetFileNumberAndPos(sectorA*m_nRecoverySectorSize, nFile, nPos);
+			int fok = fs.GetFileNumberAndPos(blockA*m_nRecoveryBlockSize, nFile, nPos);
 			if (fok!=0) continue;
 
 			t_FileInfo fi = m_arFiles.GetAt(nFile);
 			if (fi.to_recover==0 || fi.checked!=2) continue;
 
 			//Get recover data
-			int ipos = HEADER_SIZE + i*m_nRecoverySectorSize;
+			int ipos = HEADER_SIZE + i*m_nRecoveryBlockSize;
 			int rc = _fseeki64 (fRec, ipos, SEEK_SET);
 			if (rc!=0) continue;
-			int size = fread(buf_rec, 1, m_nRecoverySectorSize, fRec);
-			if (size<m_nRecoverySectorSize)	continue;
+			int size = fread(buf_rec, 1, m_nRecoveryBlockSize, fRec);
+			if (size<m_nRecoveryBlockSize)	continue;
 
 			//Get sum data
-			ipos = i*m_nRecoverySectorSize;
+			ipos = i*m_nRecoveryBlockSize;
 			rc = _fseeki64 (fRest, ipos, SEEK_SET);
 			if (rc!=0) continue;
-			size = fread(buf_sum, 1, m_nRecoverySectorSize, fRest);
-			if (size<m_nRecoverySectorSize) 	continue;
+			size = fread(buf_sum, 1, m_nRecoveryBlockSize, fRest);
+			if (size<m_nRecoveryBlockSize) 	continue;
 
 			//Get file data
-			memset(buf_file,0,m_nRecoverySectorSize);
+			memset(buf_file,0,m_nRecoveryBlockSize);
 
 			//XOR!
-			_xoradd(buf_file, buf_rec, m_nRecoverySectorSize);
-			_xoradd(buf_file, buf_sum, m_nRecoverySectorSize);
+			_xoradd(buf_file, buf_rec, m_nRecoveryBlockSize);
+			_xoradd(buf_file, buf_sum, m_nRecoveryBlockSize);
 
 			//Set file data
-			rc = fs.SetSector(m_npattern[i].sector, true);
+			rc = fs.SetBlock(m_npattern[i].block, true);
 			if (rc==0)
 			{
-				rc = fs.WriteSector(buf_file);
+				rc = fs.WriteBlock(buf_file);
 				if (rc==0)
 				{
 					m_npattern[i].size=0; 
-					m_npattern[i].sector=0;
+					m_npattern[i].block=0;
 					fi.to_recover=2;
 					fi.errors--;
 					if (fi.errors == 0)
@@ -1767,7 +1767,7 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 			int percent = 0;
 			if (fs.GetAllSize()>0)
 			{
-				percent = int(double(100*pcnt)/double(m_nCntSectors));
+				percent = int(double(100*pcnt)/double(m_nCntBlocks));
 				if (percent>100 || percent<0)
 					percent = 0;
 			}
@@ -1799,7 +1799,7 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 	m_nCntRecoverable=0;
 	m_nCntNotRecoverable=0;
 
-	for (i=0; i<m_nCntSectors; i++)
+	for (i=0; i<m_nCntBlocks; i++)
 	{
 		if (m_npattern[i].size!=0)
 		{
@@ -1873,9 +1873,9 @@ int CProtector::CheckAndRecoverSmall()
 	}
 
 	int nSegSize = SEG_SIZE*1024*1024;
-	if (nSegSize % m_nRecoverySectorSize!=0)
+	if (nSegSize % m_nRecoveryBlockSize!=0)
 	{
-		nSegSize += m_nRecoverySectorSize - (nSegSize % m_nRecoverySectorSize);
+		nSegSize += m_nRecoveryBlockSize - (nSegSize % m_nRecoveryBlockSize);
 	}
 	int nSegments = 1;
 	if (nSegSize > m_nRecoverySize)
@@ -1885,7 +1885,7 @@ int CProtector::CheckAndRecoverSmall()
 		nSegments = int(m_nRecoverySize / nSegSize);
 		if (m_nRecoverySize % nSegSize > 0) nSegments++;
 	}
-	int nSectorsPerSeg = nSegSize / m_nRecoverySectorSize;
+	int nBlocksPerSeg = nSegSize / m_nRecoveryBlockSize;
 
 	CString m_szTempFile;
 	int rc = GetTmpFileName(m_szTempFile);
@@ -1897,13 +1897,13 @@ int CProtector::CheckAndRecoverSmall()
 
 	m_blbCRC.ResetIndex();
 
-	m_npattern = new t_pattern[m_nCntSectors];
+	m_npattern = new t_pattern[m_nCntBlocks];
 
 	if (m_npattern==NULL)
 		return E_WRONG_OUT_OF_MEMORY;
-	memset(m_npattern, 0, sizeof(t_pattern)*m_nCntSectors);
+	memset(m_npattern, 0, sizeof(t_pattern)*m_nCntBlocks);
 
-	char *buf = new char [m_nRecoverySectorSize];
+	char *buf = new char [m_nRecoveryBlockSize];
 	if (buf==NULL)
 	{
 		delete [] m_szRestSum;
@@ -1922,28 +1922,28 @@ int CProtector::AddFileToRecovery(t_FileInfo fi)
 	FILE *f = _tfopen (fi.szName, _T("rb"));
 	if (f==NULL) return E_FILE_NOT_OPENS;
 
-	char *buf = new char [m_nRecoverySectorSize];
+	char *buf = new char [m_nRecoveryBlockSize];
 
 	UINT FileCRC=0;
 
 	while (!feof(f))
 	{
-		int size = fread(buf, sizeof(char), m_nRecoverySectorSize, f);
+		int size = fread(buf, sizeof(char), m_nRecoveryBlockSize, f);
 		if (size==0)
 			break;
-		if (size<m_nRecoverySectorSize)
-			memset(buf+size, 0, m_nRecoverySectorSize-size);
+		if (size<m_nRecoveryBlockSize)
+			memset(buf+size, 0, m_nRecoveryBlockSize-size);
 
 		if (size>0)
 			FileCRC = Get_CRC(buf, size, FileCRC);
 		
-		_xoradd(m_szRecovery + m_nCurrentSector*m_nRecoverySectorSize, buf, m_nRecoverySectorSize);
-		m_nCurrentSector++;
-		m_nCurrentSectorA++;
-		if (m_nCurrentSector>=m_nCntSectors)
-			m_nCurrentSector=0;
+		_xoradd(m_szRecovery + m_nCurrentBlock*m_nRecoveryBlockSize, buf, m_nRecoveryBlockSize);
+		m_nCurrentBlock++;
+		m_nCurrentBlockA++;
+		if (m_nCurrentBlock>=m_nCntBlocks)
+			m_nCurrentBlock=0;
 
-		UINT crc = Get_CRC(buf, m_nRecoverySectorSize);
+		UINT crc = Get_CRC(buf, m_nRecoveryBlockSize);
 //		if (crc==0)
 //			int k = 1;
 		m_blbCRC << crc;
@@ -1990,7 +1990,7 @@ int CProtector::CheckFile(t_FileInfo &fi)
 		fi.status=0;
 
 
-	char *buf = new char [m_nRecoverySectorSize];
+	char *buf = new char [m_nRecoveryBlockSize];
 
 	UINT FileCRC=0;
 
@@ -1999,10 +1999,10 @@ int CProtector::CheckFile(t_FileInfo &fi)
 		int size = 0;
 		if (feof(f))
 		{
-			if (to_read>=m_nRecoverySectorSize)
+			if (to_read>=m_nRecoveryBlockSize)
 			{
-				to_read-=m_nRecoverySectorSize;
-				size = m_nRecoverySectorSize;
+				to_read-=m_nRecoveryBlockSize;
+				size = m_nRecoveryBlockSize;
 				memset(buf, 0, size);
 			}
 			else
@@ -2014,15 +2014,15 @@ int CProtector::CheckFile(t_FileInfo &fi)
 		}
 		else
 		{
-			size = fread(buf, sizeof(char), m_nRecoverySectorSize, f);
-			if (size<m_nRecoverySectorSize)
+			size = fread(buf, sizeof(char), m_nRecoveryBlockSize, f);
+			if (size<m_nRecoveryBlockSize)
 			{
 				if (to_read>size)
 				{
-					if (to_read>m_nRecoverySectorSize)
+					if (to_read>m_nRecoveryBlockSize)
 					{
-						size=m_nRecoverySectorSize;
-						to_read-=m_nRecoverySectorSize;
+						size=m_nRecoveryBlockSize;
+						to_read-=m_nRecoveryBlockSize;
 					}
 					else
 					{
@@ -2045,40 +2045,40 @@ int CProtector::CheckFile(t_FileInfo &fi)
 		if (size==0)
 			break;
 
-		if (size<m_nRecoverySectorSize)
-			memset(buf+size, 0, m_nRecoverySectorSize-size);
+		if (size<m_nRecoveryBlockSize)
+			memset(buf+size, 0, m_nRecoveryBlockSize-size);
 
 		if (size>0)
 			FileCRC = Get_CRC(buf, size, FileCRC);
-		UINT crcF = Get_CRC(buf, m_nRecoverySectorSize);
+		UINT crcF = Get_CRC(buf, m_nRecoveryBlockSize);
 		
-		//_xoradd(m_szRecovery + m_nCurrentSector*m_nRecoverySectorSize, buf, m_nRecoverySectorSize);
+		//_xoradd(m_szRecovery + m_nCurrentBlock*m_nRecoveryBlockSize, buf, m_nRecoveryBlockSize);
 
 		UINT crc;
 		m_blbCRC >> crc;
 		if (crc!=crcF)
 		{
-			if (m_npattern[m_nCurrentSector].size==0)
+			if (m_npattern[m_nCurrentBlock].size==0)
 			{
-				m_npattern[m_nCurrentSector].sector = m_nCurrentSectorA;
-				m_npattern[m_nCurrentSector].size = size;
+				m_npattern[m_nCurrentBlock].block = m_nCurrentBlockA;
+				m_npattern[m_nCurrentBlock].size = size;
 				if (fi.status!=2)
 					fi.status=1;
 			}
 			else
 			{
 				fi.status=2;
-				m_npattern[m_nCurrentSector].size=-1;
+				m_npattern[m_nCurrentBlock].size=-1;
 			}
 		}
 		else
 		{
-			_xoradd(m_szRestSum + m_nCurrentSector*m_nRecoverySectorSize, buf, m_nRecoverySectorSize);
+			_xoradd(m_szRestSum + m_nCurrentBlock*m_nRecoveryBlockSize, buf, m_nRecoveryBlockSize);
 		}
-		m_nCurrentSector++;
-		m_nCurrentSectorA++;
-		if (m_nCurrentSector>=m_nCntSectors)
-			m_nCurrentSector=0;
+		m_nCurrentBlock++;
+		m_nCurrentBlockA++;
+		if (m_nCurrentBlock>=m_nCntBlocks)
+			m_nCurrentBlock=0;
 	}
 	
 	//fi.nCrc=FileCRC;

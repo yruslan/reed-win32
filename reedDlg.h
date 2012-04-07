@@ -33,8 +33,8 @@ public:
 	CListCtrl	m_lstFiles;
 	CString	m_szPercentSize;
 	CString	m_szRecSize;
-	CString	m_szSectorSize;
-	CString	m_szCntSectors;
+	CString	m_szBlockSize;
+	CString	m_szCntBlocks;
 	CString	m_szTotalSize;
 	CString m_szPath;
 	CString m_szRecoverPath;
@@ -112,7 +112,7 @@ protected:
 	afx_msg void OnBtnRecoverPath();
 	afx_msg void OnBtnRemove();
 	afx_msg void OnKillfocusEditRecSize();
-	afx_msg void OnKillfocusEditSectorSize();
+	afx_msg void OnKillfocusEditBlockSize();
 	afx_msg void OnBnClickedBtnRecoverThis();
 	afx_msg void OnBnClickedRadio1();
 	afx_msg void OnBnClickedRadio2();

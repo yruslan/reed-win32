@@ -5,7 +5,7 @@
 
 typedef unsigned __int64 FILESIZE;
 
-#define SECTOR_SIZE	32768
+#define BLOCK_SIZE	32768
 #define MAX_PATH_PROT	512
 
 #define _INSIDE_MFC_APP
@@ -49,7 +49,7 @@ struct t_pattern
 {
 	int size;
 	int file;
-	FILESIZE sector;
+	FILESIZE block;
 };
 
 UINT Get_CRC(LPCSTR szData, int nLength, UINT nCRC/*=0*/);
@@ -87,7 +87,7 @@ public:
 
 	CArray<t_FileInfo,t_FileInfo&> m_arFiles;
 
-	int m_nRecoverySectorSize;
+	int m_nRecoveryBlockSize;
 	FILESIZE m_nRecoverySize;	
 	int m_nCntRecoverable;
 	int m_nCntNotRecoverable;
@@ -110,9 +110,9 @@ private:
 	CString m_szTempFile;
 	FILE *fRest;
 
-	int m_nCntSectors;
-	int m_nCurrentSector;
-	FILESIZE m_nCurrentSectorA;
+	int m_nCntBlocks;
+	int m_nCurrentBlock;
+	FILESIZE m_nCurrentBlockA;
 	t_pattern *m_npattern;
 	char *m_szRecovery;
 	char *m_szRestSum;
