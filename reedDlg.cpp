@@ -158,7 +158,7 @@ END_MESSAGE_MAP()
 
 void NumbersToBytes(int blocks, int block_size, CString &msg)
 {
-	unsigned __int64 bytes = blocks*block_size;
+	unsigned __int64 bytes = ((unsigned __int64)blocks)*((unsigned __int64)block_size);
 
 	if (bytes<10*1024)
 	{
@@ -516,7 +516,7 @@ void CReedDlg::InvalidateControls()
 		if (m_nRadio==1)
 			m_szRecSize.Format(_T("%d"),rec_size);
 		m_szBlockSize.Format(_T("%d"),block_size);
-		rec.m_nRecoveryBlockSize = block_size;
+		rec.m_nRecoveryBlockSize = block_size*1024;
 	}
 
 	__int64 recs = _ttoi(m_szRecSize);
@@ -1355,7 +1355,7 @@ void CReedDlg::OnComplete()
 				if (rec_size>2000) block_size=128;
 				m_szRecSize.Format(_T("%d"),rec_size);
 				m_szBlockSize.Format(_T("%d"),block_size);
-				rec.m_nRecoveryBlockSize = block_size;
+				rec.m_nRecoveryBlockSize = block_size*1024;
 			}
 			UpdateData(FALSE);
 		}
@@ -1516,7 +1516,7 @@ void CReedDlg::OnComplete()
 		if (rc==0)
 		{
 			CString msg;
-			msg.Format(_T("File(s) successfully recoveres!"));
+			msg.Format(_T("File(s) successfully recovered!"));
 			MessageBox(msg,_T("Information"), MB_ICONINFORMATION);
 		}
 		else

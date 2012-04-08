@@ -62,13 +62,7 @@ public:
 
 	int GetListOfFiles(LPCTSTR szDirectory);
 
-//	int CreateSolidRecovery(int rec_size);
-//	int LoadRecovery(LPCSTR szFileName);
-//	int Check();
-//	int Recover();
-
 	int CreateSolidRecovery2(FILESIZE rec_size, LPCTSTR szFileName);
-	int CreateSeparateRecovery(int rec_size);
 	int SaveRecovery(LPCTSTR szFileName);
 	int LoadRecovery2(LPCTSTR szFileName);
 	int Check2();

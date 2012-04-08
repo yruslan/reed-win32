@@ -237,7 +237,7 @@ int CFileSpace::EnsurePathExist(LPCTSTR szFileName)
 
 int CFileSpace::SetBlock(FILESIZE nBlock, bool allow_writes=false)
 {
-	FILESIZE desired_position = nBlock*m_nBlockSize;
+	FILESIZE desired_position = nBlock*((FILESIZE)m_nBlockSize);
 	//if (desired_position == m_nCurrentPos && m_nCurrentFile>=0)	return 0;
 
 	int nFile;

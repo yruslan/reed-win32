@@ -23,7 +23,7 @@ extern CDlgProgress *g_DlgProgress;
 //extern "C" int __cdecl _fseeki64(FILE *, __int64, int);
 //extern "C" __int64 __cdecl _ftelli64(FILE *);
 
-#define FILE_VERSION	3
+#define FILE_VERSION	4
 
 int _xoradd(char *sum, const char *add, int len)
 {
@@ -203,45 +203,6 @@ int CProtector::GetListOfFiles(LPCTSTR szDirectory)
 	return 0;
 }
 
-/*
-int CProtector::CreateSolidRecovery(int size)
-{
-	if (size<3*m_nRecoveryBlockSize)
-		return -1; //Too small size
-
-	if (m_arFiles.GetSize()==0)
-		return -2; //No files!
-
-	//Calc Numblocks
-	if (size % m_nRecoveryBlockSize == 0)
-	{
-		m_nCntBlocks = size / m_nRecoveryBlockSize;
-		m_nRecoverySize = size;
-	}
-	else
-	{
-		m_nCntBlocks = size / m_nRecoveryBlockSize + 1;
-		m_nRecoverySize = size + m_nRecoveryBlockSize - (size % m_nRecoveryBlockSize);
-	}
-	m_nCurrentBlock = 0;
-	m_nCurrentBlockA = 0;
-
-	if (m_szRecovery!=NULL)
-		delete [] m_szRecovery;
-	m_szRecovery = new char [m_nRecoverySize];
-	memset(m_szRecovery,0, m_nRecoverySize*sizeof(char));
-	m_blbCRC.SetSize(0);
-	m_blbCRC.ResetIndex();
-
-	for (int i=0; i<m_arFiles.GetSize(); i++)
-	{
-		t_FileInfo fi = m_arFiles.GetAt(i);
-		AddFileToRecovery(fi);
-		m_arFiles.SetAt(i, fi);
-	}
-	return 0;
-}*/
-
 int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 {
 	if (size<3*m_nRecoveryBlockSize)
@@ -320,6 +281,7 @@ int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 ///		m_arFiles.SetAt(i, fi);
 //	}
 	CFileSpace fs;
+	fs.SetBlockSize(m_nRecoveryBlockSize);
 	for (int i=0; i<m_arFiles.GetSize(); i++)
 	{
 		t_FileInfo fi = m_arFiles.GetAt(i);
@@ -352,7 +314,7 @@ int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 			}
 		}
 
-		FILESIZE offset=segment*nSegSize;
+		FILESIZE offset=((FILESIZE)segment)*((FILESIZE)nSegSize);
 		FILESIZE offset2=offset+cur_seg_size;
 		if (offset2>fs.GetAllSize()) offset2 = fs.GetAllSize();
 
@@ -506,11 +468,6 @@ int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 	return 0;
 }
 
-int CProtector::CreateSeparateRecovery(int size)
-{
-	return 0;
-}
-
 void CProtector::CutPath(t_FileInfo *fi)
 {
 	if (fi==NULL)
@@ -553,227 +510,6 @@ void CProtector::CutBasePath(t_FileInfo *fi)
 	
 }
 
-/*
-int CProtector::SaveRecovery(LPCSTR szFileName)
-{
-	FILE *f = fopen (szFileName, "wb");
-	if (f==NULL) return -2;
-
-	unsigned int uCRC = 0;
-
-	int version = FILE_VERSION;
-	int cnt = m_arFiles.GetSize();
-	char sig[5]="$RCV";
-	unsigned long siz2 = m_blbCRC.GetSize();
-	
-	fwrite(sig,1,4,f);	
-	uCRC = Get_CRC(sig, 4, uCRC);
-
-	fwrite(&version,sizeof(version),1,f);
-	uCRC = Get_CRC(&version,sizeof(version), uCRC);
-
-	fwrite(&cnt,sizeof(cnt),1,f);
-	uCRC = Get_CRC(&cnt,sizeof(cnt), uCRC);
-
-	fwrite(&m_nRecoverySize,sizeof(m_nRecoverySize),1,f);
-	uCRC = Get_CRC(&m_nRecoverySize,sizeof(m_nRecoverySize), uCRC);
-
-	fwrite(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize),1,f);
-	uCRC = Get_CRC(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize), uCRC);
-
-	fwrite(&siz2,sizeof(siz2),1,f);
-	uCRC = Get_CRC(&siz2,sizeof(siz2), uCRC);
-
-	int ll = strlen(m_szPath);
-	fwrite(&ll, sizeof(ll),1,f);
-	uCRC = Get_CRC(&ll, sizeof(ll), uCRC);
-
-	fwrite(m_szPath, sizeof(char),ll+1,f);
-	uCRC = Get_CRC(m_szPath, sizeof(char)*(ll+1), uCRC);
-
-	bool bHasPath = true;
-	if (strcmp(m_szPath,"")==0)
-		bHasPath = false;
-
-	int i;
-	for (i=0; i<m_arFiles.GetSize(); i++)
-	{
-		t_FileInfo fi = m_arFiles.GetAt(i);
-		if (bHasPath)
-			CutBasePath(&fi);
-		else
-			CutPath(&fi);
-
-		int len = strlen(fi.szName)+1;
-		fwrite(&len, sizeof(len),1,f);
-		uCRC = Get_CRC(&len, sizeof(len), uCRC);
-		
-		fwrite(&fi.nCrc, sizeof(fi.nCrc),1,f);
-		uCRC = Get_CRC(&fi.nCrc, sizeof(fi.nCrc), uCRC);
-
-		fwrite(&fi.size, sizeof(fi.size),1,f);
-		uCRC = Get_CRC(&fi.size, sizeof(fi.size), uCRC);
-
-		fwrite(fi.szName, sizeof(char),len+1,f);
-		uCRC = Get_CRC(fi.szName, sizeof(char)*(len+1), uCRC);
-
-		//fwrite(&fi, sizeof(t_FileInfo), 1, f);
-		//uCRC = Get_CRC(&fi, sizeof(t_FileInfo), uCRC);
-	}
-	
-	fwrite(m_szRecovery, m_nRecoverySize, 1, f);
-	uCRC = Get_CRC(m_szRecovery, m_nRecoverySize, uCRC);
-
-	fwrite(m_blbCRC.GetBuffer(), 1, siz2, f);
-	uCRC = Get_CRC(m_blbCRC.GetBuffer(), siz2, uCRC);
-
-	fwrite(&uCRC, sizeof(uCRC), 1, f);
-	fclose(f);
-
-	return 0;
-}
-*/
-/*
-int CProtector::LoadRecovery(LPCSTR szFileName)
-{
-	FILE *f = fopen (szFileName, "rb");
-	if (f==NULL) return -2;
-
-	char *buf1 = new char [1000];
-	char *buf2 = new char [1000];
-	int b2e = 0;
-
-	UINT nCRC_a = 0;
-	UINT nCRC_f = 0;
-
-	while (!feof(f))
-	{
-		int size = fread(buf1, sizeof(char), 1000, f);
-		if (size<1000)
-		{
-			if (size<sizeof(UINT))
-			{
-				if (b2e==0)
-					return -1;
-				nCRC_a = Get_CRC(buf2, 1000-(sizeof(UINT)-size), nCRC_a);
-				memcpy(&nCRC_f, buf2+1000-(sizeof(UINT)-size), sizeof(UINT)-size);
-				memcpy(((char *)&nCRC_f)+(sizeof(UINT)-size), buf1, size);
-				break;
-			}
-			else
-			{
-				if (b2e)
-					nCRC_a = Get_CRC(buf2, 1000, nCRC_a);
-				nCRC_a = Get_CRC(buf1, size-sizeof(UINT), nCRC_a);
-				memcpy(&nCRC_f, buf1+size-sizeof(UINT), sizeof(UINT));
-				break;
-			}
-		}
-		if (b2e)
-			nCRC_a = Get_CRC(buf2, 1000, nCRC_a);
-		memcpy(buf2,buf1, size);
-		b2e=1;
-	}
-	fclose(f);
-
-	if (nCRC_a!=nCRC_f)
-		return -1;
-
-	//Clearing
-	Clear();
-
-	//Loading
-
-	f = fopen (szFileName, "rb");
-	if (f==NULL) return -2;
-
-	int version = FILE_VERSION;
-	int cnt = 0;
-	char sig[5]="$RCV";
-	char sig2[5];
-	unsigned long siz2 = 0;
-	
-	fread(sig2,1,4,f);	
-	fread(&version,sizeof(version),1,f);
-	if (version > FILE_VERSION) 
-		return E_VERSION_OLD;
-	fread(&cnt,sizeof(cnt),1,f);
-	if (cnt<=0) return -3;
-	fread(&m_nRecoverySize,sizeof(m_nRecoverySize),1,f);
-	if (m_nRecoverySize<=0) return -3;
-	fread(&m_nRecoveryBlockSize,sizeof(m_nRecoveryBlockSize),1,f);
-	if (m_nRecoveryBlockSize<=0) return -3;
-	fread(&siz2,sizeof(siz2),1,f);
-	if (siz2<=0) return -3;
-
-	if (version > 1)
-	{
-		int ll;
-		fread(&ll, sizeof(ll),1,f);
-		fread(m_szPath, sizeof(char),ll+1,f);
-	}
-
-	m_nCntBlocks = m_nRecoverySize/m_nRecoveryBlockSize;
-
-	//Create buffers
-	if (m_szRecovery!=NULL)
-		delete [] m_szRecovery;
-	m_szRecovery = new char [m_nRecoverySize];
-	memset(m_szRecovery,0, m_nRecoverySize*sizeof(char));
-	m_blbCRC.SetSize(siz2+1);
-	m_blbCRC.ResetIndex();
-
-	int i;
-	for (i=0; i<cnt; i++)
-	{
-		t_FileInfo fi;
-		int len;
-
-		fread(&len, sizeof(len),1,f);
-		if (len<=0) return -3;
-		fread(&fi.nCrc, sizeof(fi.nCrc),1,f);
-		fread(&fi.size, sizeof(fi.size),1,f);
-		fread(fi.szName, sizeof(char),len+1,f);
-		m_nTotalSize+=fi.size;
-		fi.status=6;
-
-		FILE *ft = fopen(fi.szName,"rb");
-		if (ft==NULL)
-		{
-			fi.status=3;
-		}
-		else
-		{
-			fclose(ft);
-			FILESIZE file_size;
-			struct _stati64 statfile;
-			if( _stati64( fi.szName, &statfile ) == 0 )
-			{
-				file_size = statfile.st_size;
-				if( file_size!=fi.size)
-					fi.status=5;
-			}
-			else
-				fi.status=4;
-		}
-		m_arFiles.Add(fi);
-	}
-	
-	fread(m_szRecovery, m_nRecoverySize, 1, f);
-	fread(m_blbCRC.GetBuffer(), 1, siz2, f);
-	fclose(f);
-
-	m_bReadOnly = true;
-
-	return 0;
-
-
-	delete [] buf2;
-	delete [] buf1;
-
-	return 0;
-}
-*/
 int CProtector::LoadRecovery2(LPCTSTR szFileName)
 {
 
@@ -1164,6 +900,7 @@ int CProtector::Check2()
 	}
 
 	CFileSpace fs;
+	fs.SetBlockSize(m_nRecoveryBlockSize);
 	bool bNotAll = false;
 #ifdef _INSIDE_MFC_APP
 	FILESIZE pcnt=0;
@@ -1266,7 +1003,7 @@ int CProtector::Check2()
 	pcnt=0;
 	if (g_DlgProgress!=NULL)
 	{
-		g_DlgProgress->m_szOperation=_T("Checking ingegirity of");
+		g_DlgProgress->m_szOperation=_T("Checking ingegrity of");
 		g_DlgProgress->m_szFileName=_T("");
 		g_DlgProgress->m_cProgress.SetRange(0,100);
 		g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
@@ -1287,7 +1024,7 @@ int CProtector::Check2()
 			}
 		}
 
-		FILESIZE offset=segment*nSegSize;
+		FILESIZE offset=((FILESIZE)segment)*((FILESIZE)nSegSize);
 		FILESIZE offset2=offset+cur_seg_size;
 		if (offset2>fs.GetAllSize()) offset2 = fs.GetAllSize();
 
@@ -1605,6 +1342,7 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 
 	int i; 
 	CFileSpace fs;
+	fs.SetBlockSize(m_nRecoveryBlockSize);
 #ifdef _INSIDE_MFC_APP
 	FILESIZE pcnt=0;
 	if (g_DlgProgress!=NULL)
@@ -1697,8 +1435,6 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 		g_DlgProgress->m_szFileName=_T("...");
 		g_DlgProgress->m_cProgress.SetRange(0,100);
 		g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
-		//g_DlgProgress->UpdateData(FALSE);
-		//g_DlgProgress->RedrawWindow();
 	}
 #endif
 	for (i=0; i<m_nCntBlocks; i++)
@@ -1716,14 +1452,15 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 			if (fi.to_recover==0 || fi.checked!=2) continue;
 
 			//Get recover data
-			int ipos = HEADER_SIZE + i*m_nRecoveryBlockSize;
+			FILESIZE ipos = (FILESIZE) HEADER_SIZE + 
+				((FILESIZE)i)*((FILESIZE)m_nRecoveryBlockSize);
 			int rc = _fseeki64 (fRec, ipos, SEEK_SET);
 			if (rc!=0) continue;
 			int size = fread(buf_rec, 1, m_nRecoveryBlockSize, fRec);
 			if (size<m_nRecoveryBlockSize)	continue;
 
 			//Get sum data
-			ipos = i*m_nRecoveryBlockSize;
+			ipos = ((FILESIZE)i)*((FILESIZE)m_nRecoveryBlockSize);
 			rc = _fseeki64 (fRest, ipos, SEEK_SET);
 			if (rc!=0) continue;
 			size = fread(buf_sum, 1, m_nRecoveryBlockSize, fRest);
@@ -1774,8 +1511,6 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 			g_DlgProgress->m_szFileName=szLastFile;
 			g_DlgProgress->m_cProgress.SetPos(percent);
 			g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
-			//g_DlgProgress->Invalidate();
-			//g_DlgProgress->RedrawWindow();
 		}
 		if (g_DlgProgress->m_bNeedTerminate)
 		{
@@ -1810,7 +1545,6 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 				m_nCntNotRecoverable++;
 		}
 	}
-	//m_lpCmdLine
 	fs.Close();
 
 	for (i=0; i<m_arFiles.GetSize(); i++)
