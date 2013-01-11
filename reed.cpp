@@ -3,13 +3,15 @@
 
 #include "stdafx.h"
 #include "reed.h"
-#include "reedDlg.h"
+#include "DlgWelcome.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+CProtector g_Protector;
 
 /////////////////////////////////////////////////////////////////////////////
 // CReedApp
@@ -48,7 +50,7 @@ BOOL CReedApp::InitInstance()
 	//  of your final executable, you should remove from the following
 	//  the specific initialization routines you do not need.
 
-	CReedDlg dlg;
+	CDlgWelcome dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();
 	if (nResponse == IDOK)

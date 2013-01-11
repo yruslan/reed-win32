@@ -13,6 +13,11 @@
 #endif
 
 #include "resource.h"		// main symbols
+#include "Protector.h"
+
+#define ID_CUSTOM_COMPLETED				10000
+
+extern CProtector g_Protector;
 
 /////////////////////////////////////////////////////////////////////////////
 // CReedApp:

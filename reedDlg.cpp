@@ -14,55 +14,9 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CAboutDlg dialog used for App About
-
-CDlgProgress *g_DlgProgress = NULL;
-
-class CAboutDlg : public CDialog
-{
-public:
-	CAboutDlg();
-
-// Dialog Data
-	//{{AFX_DATA(CAboutDlg)
-	enum { IDD = IDD_ABOUTBOX };
-	//}}AFX_DATA
-
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CAboutDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-	//{{AFX_MSG(CAboutDlg)
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
-{
-	//{{AFX_DATA_INIT(CAboutDlg)
-	//}}AFX_DATA_INIT
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CAboutDlg)
-	//}}AFX_DATA_MAP
-}
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-	//{{AFX_MSG_MAP(CAboutDlg)
-		// No message handlers
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-#define ID_CUSTOM_COMPLETED	10000
-/////////////////////////////////////////////////////////////////////////////
 // CReedDlg dialog
+
+extern CDlgProgress *g_DlgProgress;
 
 CReedDlg::CReedDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CReedDlg::IDD, pParent)
@@ -97,7 +51,7 @@ CReedDlg::~CReedDlg()
 		delete g_DlgProgress;
 		g_DlgProgress = NULL;
 	}
-	::DeleteCriticalSection(&m_CS);		
+	::DeleteCriticalSection(&m_CS);
 }
 
 
@@ -123,7 +77,7 @@ void CReedDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CReedDlg, CDialog)
 	//{{AFX_MSG_MAP(CReedDlg)
-	ON_WM_SYSCOMMAND()
+	//ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BTN_ADD, &CReedDlg::OnBtnAdd)
@@ -188,7 +142,7 @@ BOOL CReedDlg::OnInitDialog()
 	// Add "About..." menu item to system menu.
 
 	// IDM_ABOUTBOX must be in the system command range.
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+	/*ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
@@ -201,7 +155,7 @@ BOOL CReedDlg::OnInitDialog()
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
-	}
+	}*/
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
@@ -256,19 +210,6 @@ BOOL CReedDlg::OnInitDialog()
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
-void CReedDlg::OnSysCommand(UINT nID, LPARAM lParam)
-{
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
-	}
-	else
-	{
-		CDialog::OnSysCommand(nID, lParam);
-	}
-}
-
 // If you add a minimize button to your dialog, you will need the code below
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
@@ -309,78 +250,6 @@ void CReedDlg::OnLvnColumnclickFilesTab(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 
-/*	int m_nCmpCol = pNMLV->iSubItem;	
-	int cnt = m_arFiles.GetCount();
-	for (int i = cnt-2; i > 0; i--)
-	{
-		for (int j = 0; j<=i; j++)
-		{
-			Strata1 = m_pArStrata->GetAt(j);
-			Strata2 = m_pArStrata->GetAt(j+1);
-			switch (m_nCmpCol)
-			{
-			case 0:
-				if (Strata1.m_nCode > Strata2.m_nCode)
-				{
-					m_pArStrata->RemoveAt(j);
-					m_pArStrata->InsertAt(j+1, Strata1);
-				}
-				break;
-			case 1:
-				if ( _tcscmp( Strata1.m_szName, Strata2.m_szName) > 0)
-				{
-					m_pArStrata->RemoveAt(j);
-					m_pArStrata->InsertAt(j+1, Strata1);
-				}
-				break;
-			case 2:
-				if ( Strata1.m_flDepth > Strata2.m_flDepth )
-				{
-					m_pArStrata->RemoveAt(j);
-					m_pArStrata->InsertAt(j+1, Strata1);
-				}
-				break;
-			case 3:
-				if (Strata1.m_nType > Strata2.m_nType)
-				{
-					m_pArStrata->RemoveAt(j);
-					m_pArStrata->InsertAt(j+1, Strata1);
-				}
-				break;
-			case 4:
-				if (Strata1.m_bIsBottom > Strata2.m_bIsBottom)
-				{
-					m_pArStrata->RemoveAt(j);
-					m_pArStrata->InsertAt(j+1, Strata1);
-				}
-				break;
-			case 5:
-				if (Strata1.m_fl_X > Strata2.m_fl_X)
-				{
-					m_pArStrata->RemoveAt(j);
-					m_pArStrata->InsertAt(j+1, Strata1);
-				}
-				break;
-			case 6:
-				if (Strata1.m_fl_Y > Strata2.m_fl_Y)
-				{
-					m_pArStrata->RemoveAt(j);
-					m_pArStrata->InsertAt(j+1, Strata1);
-				}
-				break;
-			default:
-				if (Strata1.m_fl_Z > Strata2.m_fl_Z)
-				{
-					m_pArStrata->RemoveAt(j);
-					m_pArStrata->InsertAt(j+1, Strata1);
-				}
-				break;
-			}
-		}			
-	}
-
-	UpDateList();*/
-    
 	*pResult = 0;
 }
 
@@ -1190,7 +1059,8 @@ unsigned _stdcall CReedDlg::trdAddDir (LPVOID lpParameter)
 	CReedDlg *d = (CReedDlg * ) lpParameter;
 	d->m_nOperationType = _OP_ADDDIR;
 
-	int rc = d->rec.AddDir(d->m_szArgDir);
+	//int rc = d->rec.AddDir(d->m_szArgDir);
+	int rc = 0;
 
 	::EnterCriticalSection(&d->m_CS);
 	d->m_nReturnValue = rc;

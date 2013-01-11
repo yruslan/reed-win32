@@ -7,3 +7,8 @@ glob:reed.opt
 glob:reed.aps
 glob:.hgignore
 glob:Release/*
+glob:*.tmp
+glob:*.orig
+glob:*.user
+syntax: glob
+Debug/*

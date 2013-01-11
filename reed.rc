@@ -93,9 +93,9 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,15,20,20
     LTEXT           "Reed-Solomon Data Protection",IDC_STATIC,45,11,119,8,SS_NOPREFIX
-    LTEXT           "by Ruslan Yushchenko, 2009-2012",IDC_STATIC,45,23,119,8
+    LTEXT           "by Ruslan Yushchenko, 2009-2013",IDC_STATIC,45,23,119,8
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
-    LTEXT           "Version 1.07, licenced under GPL v2",IDC_STATIC,45,38,119,8
+    LTEXT           "Version 2.00, licenced under GPL v2",IDC_STATIC,45,38,119,8
 END
 
 IDD_REED_DIALOG DIALOGEX 0, 0, 487, 274
@@ -155,6 +155,52 @@ BEGIN
     CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,7,46,225,14
     CTEXT           "Static",IDC_OPERATION,7,7,225,12
     CTEXT           "Static",IDC_FILENAME,7,24,225,17
+END
+
+IDD_DLG_WELCOME DIALOGEX 0, 0, 302, 244
+STYLE DS_ABSALIGN | DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Unreliable Media Data Protection and Recovery"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Welcome to the data protection on a unreliable media!",IDC_STATIC,63,9,185,10
+    LTEXT           "This program enrures integrity of your data by checksuming its contents and also adding a redundant recovery info that can be used later to recover the corrupted bits. The larger is recovery info the bigger damage can be restored.",IDC_STATIC,7,21,288,27
+    PUSHBUTTON      "Protect individual files",IDC_BTN_PROTECT_FILES,7,54,103,23,WS_DISABLED
+    LTEXT           "You can protect individual files (i.e. archives) from damage and later recover if needed.",IDC_STATIC,116,55,172,18
+    PUSHBUTTON      "Protect a directory tree",IDC_BTN_PROTECT_DIR,7,93,103,23
+    LTEXT           "You can protect a directory tree (i.e. contents of a DVD) from damage and later recover if needed.",IDC_STATIC,115,94,173,20
+    PUSHBUTTON      "Check and recover",IDC_BTN_CHECK,7,134,103,23,WS_DISABLED
+    LTEXT           "You can check if protected files were changed and recover if possible.",IDC_STATIC,115,135,173,20
+    PUSHBUTTON      "Copy from damaged media",IDC_BTN_COPY_DAMAGED,7,173,103,23,WS_DISABLED
+    LTEXT           "You can copy from a damaged media if you encounter media read errors (i.e. CD/DVD is scratched)",IDC_STATIC,116,176,173,20
+    PUSHBUTTON      "About",IDC_BTN_ABOUT,7,221,53,16
+    PUSHBUTTON      "Exit",IDCANCEL,242,221,53,16
+END
+
+IDD_PP_PROTECT_SIZE DIALOGEX 0, 0, 297, 189
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select recovery info size and placement"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "  Fixed:",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,19,86,38,10
+    CONTROL         "  Portion of Data:",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,19,103,70,10
+    EDITTEXT        IDC_EDIT_REC_SIZE,63,85,36,13,ES_AUTOHSCROLL
+    LTEXT           "MB",IDC_STATIC,101,87,15,8
+    EDITTEXT        IDC_EDIT_PERCENT_SIZE,206,102,36,13,ES_AUTOHSCROLL
+    LTEXT           "%",IDC_STATIC,246,104,10,8
+    GROUPBOX        " Save recovery info ",IDC_STATIC,7,128,283,48
+    GROUPBOX        " Recovery Info Size ",IDC_STATIC,7,72,283,52
+    EDITTEXT        IDC_EDIT_RECOVER_PATH2,20,153,234,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BTN_RECOVER_PATH,260,154,15,13
+    LTEXT           "Recovery info file will be placed to",IDC_STATIC,20,142,119,9
+    CONTROL         "",IDC_SLIDER_PERCENT,"msctls_trackbar32",TBS_AUTOTICKS | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,90,103,111,12
+    GROUPBOX        " Data to protect ",IDC_STATIC,7,7,283,58
+    LTEXT           "Location:",IDC_STATIC,15,19,38,9
+    LTEXT           "Files:",IDC_STATIC,15,33,27,9
+    LTEXT           "Size:",IDC_STATIC,15,47,30,9
+    LTEXT           "Location:",IDC_STATIC_DIR,53,19,229,9
+    LTEXT           "Location:",IDC_STATIC_FILES,53,33,229,9
+    LTEXT           "Location:",IDC_STATIC_SIZE,53,47,229,9
 END
 
 
@@ -227,6 +273,22 @@ BEGIN
         RIGHTMARGIN, 232
         TOPMARGIN, 7
         BOTTOMMARGIN, 88
+    END
+
+    IDD_DLG_WELCOME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 295
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 237
+    END
+
+    IDD_PP_PROTECT_SIZE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 290
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 182
     END
 END
 #endif    // APSTUDIO_INVOKED

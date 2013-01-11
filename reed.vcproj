@@ -243,7 +243,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DlgWelcome.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\FileSpace.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PPRecoverySize.cpp"
 				>
 			</File>
 			<File
@@ -362,7 +370,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DlgWelcome.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FileSpace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PPRecoverySize.h"
 				>
 			</File>
 			<File
