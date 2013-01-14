@@ -60,7 +60,7 @@ public:
 	CProtector();
 	virtual ~CProtector();
 
-	int GetListOfFiles(LPCTSTR szDirectory);
+	//int GetListOfFiles(LPCTSTR szDirectory);
 
 	int CreateSolidRecovery2(FILESIZE rec_size, LPCTSTR szFileName);
 	int SaveRecovery(LPCTSTR szFileName);
@@ -76,6 +76,7 @@ public:
 	int AddDir(LPCTSTR szPath);
 	bool isAllChecked();
 	int GetTmpFileName(CString &szFileName);
+	bool isOrigPathCorrect();
 
 	UINT CProtector::Get_CRC(void *_szData, int nLength, UINT nCRC/*=0*/);
 
@@ -89,7 +90,9 @@ public:
 	TCHAR m_szPath[MAX_PATH_PROT];
 
 	bool m_bReadOnly;
+	bool m_bCreateSubdirs;
 	CString m_szRecoverPath;
+	CString m_szRecFileName;
 
 private:
 	void Init_CRC32_Table();
@@ -100,7 +103,6 @@ private:
 	int AddFileToRecovery(t_FileInfo fi);
 	int CheckFile(t_FileInfo &fi);
 
-	CString m_szRecFileName;
 	CString m_szTempFile;
 	FILE *fRest;
 

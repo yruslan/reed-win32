@@ -169,7 +169,7 @@ BEGIN
     LTEXT           "You can protect individual files (i.e. archives) from damage and later recover if needed.",IDC_STATIC,116,55,172,18
     PUSHBUTTON      "Protect a directory tree",IDC_BTN_PROTECT_DIR,7,93,103,23
     LTEXT           "You can protect a directory tree (i.e. contents of a DVD) from damage and later recover if needed.",IDC_STATIC,115,94,173,20
-    PUSHBUTTON      "Check and recover",IDC_BTN_CHECK,7,134,103,23,WS_DISABLED
+    PUSHBUTTON      "Check and recover",IDC_BTN_CHECK,7,134,103,23
     LTEXT           "You can check if protected files were changed and recover if possible.",IDC_STATIC,115,135,173,20
     PUSHBUTTON      "Copy from damaged media",IDC_BTN_COPY_DAMAGED,7,173,103,23,WS_DISABLED
     LTEXT           "You can copy from a damaged media if you encounter media read errors (i.e. CD/DVD is scratched)",IDC_STATIC,116,176,173,20
@@ -182,22 +182,86 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Select recovery info size and placement"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
+    GROUPBOX        " Data to protect ",IDC_STATIC,7,7,283,58
+    LTEXT           "Location:",IDC_STATIC,15,19,38,9
+    LTEXT           "Location:",IDC_STATIC_DIR,53,19,229,9
+    LTEXT           "Files:",IDC_STATIC,15,33,27,9
+    LTEXT           "Location:",IDC_STATIC_FILES,53,33,52,9
+    PUSHBUTTON      "View the List of Files",IDC_BTN_LIST2,108,32,82,13
+    LTEXT           "Size:",IDC_STATIC,15,47,30,9
+    LTEXT           "Location:",IDC_STATIC_SIZE,53,47,229,9
+    GROUPBOX        " Recovery Info Size ",IDC_STATIC,7,72,283,52
+    CONTROL         "",IDC_SLIDER_PERCENT,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,17,88,193,19
     EDITTEXT        IDC_EDIT_REC_SIZE,213,88,42,13,ES_AUTOHSCROLL
     LTEXT           "MB",IDC_STATIC,258,90,20,8
     CTEXT           "%",IDC_STATIC_PERCENT,103,108,51,8
     GROUPBOX        " Save recovery info ",IDC_STATIC,7,128,283,48
-    GROUPBOX        " Recovery Info Size ",IDC_STATIC,7,72,283,52
-    EDITTEXT        IDC_EDIT_RECOVER_PATH2,20,153,234,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BTN_RECOVER_PATH,260,154,15,13
     LTEXT           "Recovery info file will be placed to",IDC_STATIC,20,142,119,9
-    CONTROL         "",IDC_SLIDER_PERCENT,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,17,88,193,19
-    GROUPBOX        " Data to protect ",IDC_STATIC,7,7,283,58
-    LTEXT           "Location:",IDC_STATIC,15,19,38,9
-    LTEXT           "Files:",IDC_STATIC,15,33,27,9
-    LTEXT           "Size:",IDC_STATIC,15,47,30,9
-    LTEXT           "Location:",IDC_STATIC_DIR,53,19,229,9
-    LTEXT           "Location:",IDC_STATIC_FILES,53,33,229,9
-    LTEXT           "Location:",IDC_STATIC_SIZE,53,47,229,9
+    EDITTEXT        IDC_EDIT_RECOVER_PATH2,20,153,234,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BTN_RECOVER_PATH,260,153,15,13
+END
+
+IDD_DLG_CHECK_PATHS DIALOGEX 0, 0, 297, 189
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select oridinal data location"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        " Recovery Info  ",-1,7,7,283,58
+    LTEXT           "Original Path:",-1,15,19,46,9
+    LTEXT           "",IDC_STATIC_DIR,65,19,217,9
+    LTEXT           "Files:",-1,15,33,27,9
+    LTEXT           "Location:",IDC_STATIC_FILES,64,33,40,9
+    PUSHBUTTON      "View the List of Files",IDC_BTN_LIST,108,32,82,13
+    LTEXT           "Size:",-1,15,47,30,9
+    LTEXT           "Location:",IDC_STATIC_SIZE,64,47,216,9
+    GROUPBOX        " Protected Files Location  ",-1,7,72,283,48
+    LTEXT           "Please, specify a folder to search for protected files",IDC_STATIC_MESSAGE,21,86,190,9
+    EDITTEXT        IDC_EDIT_SRC_PATH,20,97,234,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BTN_SRC_PATH,260,97,15,13
+    PUSHBUTTON      "Next >",IDOK,178,166,49,16
+    PUSHBUTTON      "Cancel",IDCANCEL,241,166,49,16
+    PUSHBUTTON      "< Back",IDC_BTN_BACK,122,166,49,16,WS_DISABLED
+END
+
+IDD_DLG_CHECK_FILES DIALOGEX 0, 0, 297, 189
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION " List of Protected Files "
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        " Protected Files   ",-1,7,7,283,151
+    CONTROL         "",IDC_LIST_FILES,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,18,22,262,111
+    PUSHBUTTON      "Quick Check Selected",IDC_BTN_QUCK_CHECK,189,137,89,16
+    PUSHBUTTON      "< Back",IDC_BTN_BACK,122,166,49,16
+    PUSHBUTTON      "Next >",IDOK,178,166,49,16
+    PUSHBUTTON      "Cancel",IDCANCEL,241,166,49,16
+END
+
+IDD_DLG_CHECK_RECOVER DIALOGEX 0, 0, 297, 189
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION " List of Protected Files "
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        " Missing or Damaged Files ",-1,7,25,283,86
+    CONTROL         "",IDC_LIST_FILES,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,18,38,262,64
+    GROUPBOX        " Save Recovered Files to  ",-1,7,115,283,45
+    EDITTEXT        IDC_EDIT_RECOVER_PATH2,20,129,234,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BTN_RECOVER_PATH,260,128,15,13
+    CONTROL         "Recover In-Place",IDC_CHK_INPLACE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,22,145,74,11
+    CONTROL         "Create Subdirectories",IDC_CHK_SUBDIRS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,100,145,85,11
+    PUSHBUTTON      "< Back",IDC_BTN_BACK,122,166,49,16,WS_DISABLED
+    PUSHBUTTON      "Recover",IDOK,178,166,49,16
+    PUSHBUTTON      "Cancel",IDCANCEL,241,166,49,16
+    LTEXT           "Static",IDC_STATIC_MSG,18,9,257,12
+END
+
+IDD_DLG_LIST DIALOGEX 0, 0, 287, 232
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION " List of Protected Files "
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        " The list of Protected Files ",IDC_GROUP_ALL,7,7,273,195
+    CONTROL         "",IDC_LIST_FILES,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,18,22,251,172
+    PUSHBUTTON      "OK",IDOK,124,209,49,16
 END
 
 
@@ -286,6 +350,38 @@ BEGIN
         RIGHTMARGIN, 290
         TOPMARGIN, 7
         BOTTOMMARGIN, 182
+    END
+
+    IDD_DLG_CHECK_PATHS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 290
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 182
+    END
+
+    IDD_DLG_CHECK_FILES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 290
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 182
+    END
+
+    IDD_DLG_CHECK_RECOVER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 290
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 182
+    END
+
+    IDD_DLG_LIST, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 280
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 225
     END
 END
 #endif    // APSTUDIO_INVOKED

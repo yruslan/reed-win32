@@ -52,6 +52,7 @@ CProtector::CProtector()
 	m_szRecFileName = _T("");
 	fRest = NULL;
 	m_szRecoverPath = _T("");
+	m_bCreateSubdirs = true;
 	Init_CRC32_Table();
 }
 
@@ -198,10 +199,10 @@ int CProtector::AddFileInfo(LPCTSTR szFileName)
 	return 0;
 }
 
-int CProtector::GetListOfFiles(LPCTSTR szDirectory)
-{
-	return 0;
-}
+//int CProtector::GetListOfFiles(LPCTSTR szDirectory)
+//{
+//	return 0;
+//}
 
 int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 {
@@ -1003,7 +1004,7 @@ int CProtector::Check2()
 	pcnt=0;
 	if (g_DlgProgress!=NULL)
 	{
-		g_DlgProgress->m_szOperation=_T("Checking ingegrity of");
+		g_DlgProgress->m_szOperation=_T("Checking integrity of");
 		g_DlgProgress->m_szFileName=_T("");
 		g_DlgProgress->m_cProgress.SetRange(0,100);
 		g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
@@ -1933,4 +1934,21 @@ bool CProtector::isAllChecked()
 	{
 		return true;
 	}
+}
+
+bool CProtector::isOrigPathCorrect()
+{
+	if (m_arFiles.GetSize()==0)
+		return false;
+	
+	int cnt = m_arFiles.GetSize()<=10 ? m_arFiles.GetSize() : 10;
+	int i;
+	CString szPathName;
+	for (i=0; i<cnt; i++)
+	{
+		szPathName.Format(_T("%s%s"), m_szPath, m_arFiles[i].szName);		
+		if (_taccess(szPathName, 0)!=0)
+			return false;
+	}
+	return true;
 }

@@ -3,10 +3,14 @@
 
 #include "stdafx.h"
 #include "reed.h"
+#include "utils.h"
 #include <process.h>
 #include "DlgWelcome.h"
 #include "DlgProgress.h"
 #include "PPRecoverySize.h"
+#include "DlgCheckPath.h"
+#include "DlgCheckFiles.h"
+#include "DlgRecover.h"
 
 CDlgProgress *g_DlgProgress = NULL;
 
@@ -89,6 +93,7 @@ BEGIN_MESSAGE_MAP(CDlgWelcome, CDialog)
 	ON_BN_CLICKED(IDC_BTN_ABOUT, &CDlgWelcome::OnBnClickedBtnAbout)
 	ON_BN_CLICKED(IDC_BTN_PROTECT_DIR, &CDlgWelcome::OnBnClickedBtnProtectDir)
 	ON_COMMAND(ID_CUSTOM_COMPLETED, &CDlgWelcome::OnComplete)
+	ON_BN_CLICKED(IDC_BTN_CHECK, &CDlgWelcome::OnBnClickedBtnCheck)
 END_MESSAGE_MAP()
 
 // CDlgWelcome message handlers
@@ -237,6 +242,19 @@ void CDlgWelcome::OnBnClickedBtnProtectDir()
 	int rc = RunAsync(trdAddDir);
 }
 
+void CDlgWelcome::OnBnClickedBtnCheck()
+{
+	g_Protector.Clear();
+
+	CFileDialog FileDialog( TRUE, _T("RECOVERY"), _T("*.rcv"), 0, _T("Recovery Files (*.rcv)|*.rcv||"));
+	if(FileDialog.DoModal()==IDCANCEL ) return;
+
+	CString szRecFile = FileDialog.GetPathName(); 
+	
+	m_szArgFileName = szRecFile;
+	int rc = RunAsync(trdLoadRecovery);
+}
+
 int CDlgWelcome::RunAsync (StaticFunction fn)
 {
 	::EnterCriticalSection(&m_CS);
@@ -294,6 +312,57 @@ unsigned _stdcall CDlgWelcome::trdProtectDir (LPVOID lpParameter)
 	d->m_nOperationType = _OP_PROTECTDIR;
 
 	int rc = g_Protector.CreateSolidRecovery2(d->m_nArgSize, d->m_szArgFileName);
+
+	::EnterCriticalSection(&d->m_CS);
+	d->m_nReturnValue = rc;
+	::LeaveCriticalSection(&d->m_CS);
+
+	d->PostMessage(WM_COMMAND, ID_CUSTOM_COMPLETED);
+
+	return 0;
+}
+
+unsigned _stdcall CDlgWelcome::trdLoadRecovery (LPVOID lpParameter)
+{
+	if (lpParameter == NULL) return -1;
+	CDlgWelcome *d = (CDlgWelcome * ) lpParameter;
+	d->m_nOperationType = _OP_LOADRECOVERY;
+
+	int rc = g_Protector.LoadRecovery2(d->m_szArgFileName);
+
+	::EnterCriticalSection(&d->m_CS);
+	d->m_nReturnValue = rc;
+	::LeaveCriticalSection(&d->m_CS);
+
+	d->PostMessage(WM_COMMAND, ID_CUSTOM_COMPLETED);
+
+	return 0;
+}
+
+unsigned _stdcall CDlgWelcome::trdCheckFiles (LPVOID lpParameter)
+{
+	if (lpParameter == NULL) return -1;
+	CDlgWelcome *d = (CDlgWelcome * ) lpParameter;
+	d->m_nOperationType = _OP_CHECKFILES;
+
+	int rc = g_Protector.Check2();
+
+	::EnterCriticalSection(&d->m_CS);
+	d->m_nReturnValue = rc;
+	::LeaveCriticalSection(&d->m_CS);
+
+	d->PostMessage(WM_COMMAND, ID_CUSTOM_COMPLETED);
+
+	return 0;
+}
+
+unsigned _stdcall CDlgWelcome::trdRecoverFiles (LPVOID lpParameter)
+{
+	if (lpParameter == NULL) return -1;
+	CDlgWelcome *d = (CDlgWelcome * ) lpParameter;
+	d->m_nOperationType = _OP_RECOVER;
+
+	int rc = g_Protector.Recover2();
 
 	::EnterCriticalSection(&d->m_CS);
 	d->m_nReturnValue = rc;
@@ -378,4 +447,139 @@ void CDlgWelcome::OnComplete()
 
 		g_Protector.Clear();
 	}
+
+	if (m_nOperationType==_OP_LOADRECOVERY)
+	{
+		if (rc!=0)
+		{
+			if (rc == E_CRC_ERROR)
+			{
+				CString msg;
+				msg.Format(_T("CRC Error! Bad Recovery File!"));
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+			}
+			if (rc == E_FILE_NOT_OPENS)
+			{
+				CString msg;
+				msg.Format(_T("Error opening recovery file %s!"), m_szArgFileName);
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+			}
+			if (rc == E_VERSION_OLD)
+			{
+				CString msg;
+				msg.Format(_T("Version of recovery is too old!"));
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+			}
+			if (rc == E_FORMAT_ERROR)
+			{
+				CString msg;
+				msg.Format(_T("Unknown format error!"));
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+			}
+			return; 
+		}
+		if (g_Protector.m_nTotalSize==0)
+			return;
+
+		//Wizard! Specify the original path and files to check
+		int nStep = 1;
+		while (true)
+		{
+			if (nStep==1)
+			{
+				CDlgCheckPath dlg1;
+				int ret = dlg1.DoModal();
+
+				if (ret!=IDOK)
+					return;
+				nStep++;
+			}
+			if (nStep==2)
+			{
+				CDlgCheckFiles dlg2;
+				int ret = dlg2.DoModal();
+
+				if (ret==2)
+				{
+					nStep--;
+					continue;
+				}
+				if (ret!=IDOK)
+					return;
+				//Run check
+				//...
+				for (ret=0; ret<g_Protector.m_arFiles.GetSize(); ret++)
+				{
+					t_FileInfo fi = g_Protector.m_arFiles.GetAt(ret);
+					fi.checked = 1;
+					g_Protector.m_arFiles.SetAt(ret, fi);
+				}
+
+				RunAsync(trdCheckFiles);
+				return;
+			}
+			break;
+		}
+	}
+	if (m_nOperationType==_OP_CHECKFILES)
+	{
+		if (rc==0)
+		{
+			MessageBox(_T("Check complete. No errors found!"),_T("Info"), MB_ICONINFORMATION);
+		}
+		else
+		{
+			//Select files to recover
+			//and recover path
+			CDlgRecover dlg;
+			int ret = dlg.DoModal();
+
+			if (ret==IDOK)
+			{
+				if (dlg.m_bInPlace)
+					g_Protector.m_szRecoverPath = _T("");
+				else
+					g_Protector.m_szRecoverPath = dlg.m_szRecoverPath;
+
+				if (dlg.m_bInPlace)
+					g_Protector.m_bCreateSubdirs = true;
+				else
+					g_Protector.m_bCreateSubdirs = (dlg.m_bSubdirs!=FALSE);
+
+				for (ret=0; ret<g_Protector.m_arFiles.GetSize(); ret++)
+				{
+					t_FileInfo fi = g_Protector.m_arFiles.GetAt(ret);
+					if (fi.status>0)
+					{
+						fi.to_recover = 1;
+						g_Protector.m_arFiles.SetAt(ret, fi);
+					}
+				}
+
+				//Recover
+				//...
+				int rc = RunAsync(trdRecoverFiles);
+
+			}
+
+		}
+		return;
+	}
+	if (m_nOperationType==_OP_RECOVER)
+	{
+		if (rc==0)
+		{
+			CString msg;
+			msg.Format(_T("Files are successfully recovered!"));
+			MessageBox(msg,_T("Information"), MB_ICONINFORMATION);
+		}
+		else
+		{
+			CString msg;
+			msg.Format(_T("Recover failed!"));
+			MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+		}
+		return;
+	}
+
 }

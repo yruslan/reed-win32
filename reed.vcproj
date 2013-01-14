@@ -239,7 +239,23 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\DlgCheckFiles.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DlgCheckPath.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DlgListFiles.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\DlgProgress.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DlgRecover.cpp"
 				>
 			</File>
 			<File
@@ -356,6 +372,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\utils.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -366,7 +386,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DlgCheckFiles.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DlgCheckPath.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DlgListFiles.h"
+				>
+			</File>
+			<File
 				RelativePath=".\DlgProgress.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DlgRecover.h"
 				>
 			</File>
 			<File
@@ -399,6 +435,10 @@
 			</File>
 			<File
 				RelativePath="StdAfx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\utils.h"
 				>
 			</File>
 		</Filter>

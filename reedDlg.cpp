@@ -6,6 +6,7 @@
 #include "reed.h"
 #include "reedDlg.h"
 #include "DlgProgress.h"
+#include "utils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -109,23 +110,6 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CReedDlg message handlers
-
-void NumbersToBytes(int blocks, int block_size, CString &msg)
-{
-	unsigned __int64 bytes = ((unsigned __int64)blocks)*((unsigned __int64)block_size);
-
-	if (bytes<10*1024)
-	{
-		msg.Format(_T("%u bytes"), bytes);
-	}
-	else
-	{
-		if (bytes<5*1024*1024)
-			msg.Format(_T("%u KB"), (unsigned __int64) (bytes/1024));
-		else
-			msg.Format(_T("%d MB"), int(bytes/(1024*1024)));
-	}
-}
 
 BOOL CReedDlg::OnInitDialog()
 {

@@ -68,4 +68,5 @@ public:
 	afx_msg void OnBnClickedBtnProtectDir();
 	afx_msg void OnBnClickedBtnAbout();
 	afx_msg void OnComplete();
+	afx_msg void OnBnClickedBtnCheck();
 };

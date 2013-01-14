@@ -3,8 +3,9 @@
 
 #include "stdafx.h"
 #include "reed.h"
+#include "utils.h"
 #include "PPRecoverySize.h"
-
+#include "DlgListFiles.h"
 
 // CPPRecoverySize dialog
 
@@ -24,6 +25,7 @@ CPPRecoverySize::CPPRecoverySize()
 
 CPPRecoverySize::~CPPRecoverySize()
 {
+	m_pBoldFont.DeleteObject();
 }
 
 void CPPRecoverySize::DoDataExchange(CDataExchange* pDX)
@@ -44,6 +46,7 @@ BEGIN_MESSAGE_MAP(CPPRecoverySize, CPropertyPage)
 	ON_EN_KILLFOCUS(IDC_EDIT_PERCENT_SIZE, &CPPRecoverySize::OnEnKillfocusEditPercentSize)
 	ON_BN_CLICKED(IDC_BTN_RECOVER_PATH, &CPPRecoverySize::OnBnClickedBtnRecoverPath)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_PERCENT, &CPPRecoverySize::OnNMCustomdrawSliderPercent)
+	ON_BN_CLICKED(IDC_BTN_LIST2, &CPPRecoverySize::OnBnClickedBtnList2)
 END_MESSAGE_MAP()
 
 
@@ -52,6 +55,16 @@ END_MESSAGE_MAP()
 BOOL CPPRecoverySize::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
+
+	//Setting up bold fonts for values
+	LOGFONT logfont;
+	GetDlgItem(IDC_STATIC_DIR)->GetFont()->GetLogFont(&logfont);
+	logfont.lfWeight=FW_BOLD;
+	m_pBoldFont.CreateFontIndirect(&logfont);
+
+	GetDlgItem(IDC_STATIC_DIR)->SetFont(&m_pBoldFont, TRUE);
+	GetDlgItem(IDC_STATIC_FILES)->SetFont(&m_pBoldFont, TRUE);
+	GetDlgItem(IDC_STATIC_SIZE)->SetFont(&m_pBoldFont, TRUE);
 	
 	m_cSliderPercent.SetRange(1, 50);
 	m_nSliderPercent = 10;
@@ -69,7 +82,9 @@ BOOL CPPRecoverySize::OnInitDialog()
 BOOL CPPRecoverySize::OnSetActive() 
 {
 	m_szFiles.Format(_T("%d"), g_Protector.m_arFiles.GetSize());
-	m_szSize.Format(_T("%d MB"), int(double(g_Protector.m_nTotalSize)/double(1024*1024)));
+	//m_szSize.Format(_T("%d MB"), int(double(g_Protector.m_nTotalSize)/double(1024*1024)));
+	int nMB = int(double(g_Protector.m_nTotalSize)/double(1024*1024));
+	HumanReadibleMegabytes(nMB, m_szSize);
 	
 	UpdateData(FALSE);
 
@@ -156,4 +171,10 @@ void CPPRecoverySize::OnNMCustomdrawSliderPercent(NMHDR *pNMHDR, LRESULT *pResul
 		GetDlgItem(IDC_STATIC_PERCENT)->SetWindowText(szPercent);
 		UpdateData(FALSE);		
 	}
+}
+
+void CPPRecoverySize::OnBnClickedBtnList2()
+{
+	CDlgListFiles dlg;
+	dlg.DoModal();
 }

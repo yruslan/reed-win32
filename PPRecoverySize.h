@@ -23,6 +23,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	CFont m_pBoldFont;
+
 public:
 	void InvalidateControls();
 
@@ -38,4 +40,5 @@ public:
 	afx_msg void OnEnKillfocusEditPercentSize();
 	afx_msg void OnBnClickedBtnRecoverPath();
 	afx_msg void OnNMCustomdrawSliderPercent(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedBtnList2();
 };
