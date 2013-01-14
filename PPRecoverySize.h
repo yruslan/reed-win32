@@ -3,6 +3,7 @@
 
 // CPPRecoverySize dialog
 #include "reed.h"
+#include "afxcmn.h"
 
 class CPPRecoverySize : public CPropertyPage
 {
@@ -23,8 +24,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	int m_nRadio;
-
 	void InvalidateControls();
 
 	CString m_szFolder;
@@ -32,11 +31,11 @@ public:
 	CString m_szSize;
 	CString m_szRecFile;
 	int m_nRecSizeMB;
-	int m_nRecSizePercent;
+	int m_nSliderPercent;
+	CSliderCtrl m_cSliderPercent;
 
-	afx_msg void OnBnClickedRadio1();
-	afx_msg void OnBnClickedRadio2();
 	afx_msg void OnEnKillfocusEditRecSize();
 	afx_msg void OnEnKillfocusEditPercentSize();
 	afx_msg void OnBnClickedBtnRecoverPath();
+	afx_msg void OnNMCustomdrawSliderPercent(NMHDR *pNMHDR, LRESULT *pResult);
 };

@@ -334,17 +334,7 @@ void CDlgWelcome::OnComplete()
 
 		int rec_size=1;
 
-		if (p1.m_nRadio==0)
-		{
-			//Fixed
-			rec_size = p1.m_nRecSizeMB;			
-		}
-		else
-		{
-			//Percent
-			double percent = double(p1.m_nRecSizePercent)*0.01;
-			rec_size = int((double(g_Protector.m_nTotalSize)*percent)/double(1024*1024));
-		}
+		rec_size = p1.m_nRecSizeMB;			
 
 		int block_size=4;
 		if (rec_size<1) rec_size = 1;

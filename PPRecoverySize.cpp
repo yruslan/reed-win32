@@ -14,13 +14,11 @@ CPPRecoverySize::CPPRecoverySize()
 	: CPropertyPage(CPPRecoverySize::IDD)
 	, m_szRecFile(_T(""))
 	, m_nRecSizeMB(100)
-	, m_nRecSizePercent(10)
+	, m_nSliderPercent(0)
 {
 	m_szFolder = _T("");
 	m_szFiles = _T("");
 	m_szSize = _T("");
-	m_nRadio = 0;
-	m_nRecSizePercent = 10;
 	m_nRecSizeMB = 100;
 }
 
@@ -36,17 +34,16 @@ void CPPRecoverySize::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_STATIC_SIZE, m_szSize);
 	DDX_Text(pDX, IDC_EDIT_RECOVER_PATH2, m_szRecFile);
 	DDX_Text(pDX, IDC_EDIT_REC_SIZE, m_nRecSizeMB);
-	DDX_Text(pDX, IDC_EDIT_PERCENT_SIZE, m_nRecSizePercent);
-	DDX_Radio(pDX, IDC_RADIO1, m_nRadio);
+	DDX_Slider(pDX, IDC_SLIDER_PERCENT, m_nSliderPercent);
+	DDX_Control(pDX, IDC_SLIDER_PERCENT, m_cSliderPercent);
 }
 
 
 BEGIN_MESSAGE_MAP(CPPRecoverySize, CPropertyPage)
-	ON_BN_CLICKED(IDC_RADIO1, &CPPRecoverySize::OnBnClickedRadio1)
-	ON_BN_CLICKED(IDC_RADIO2, &CPPRecoverySize::OnBnClickedRadio2)
 	ON_EN_KILLFOCUS(IDC_EDIT_REC_SIZE, &CPPRecoverySize::OnEnKillfocusEditRecSize)
 	ON_EN_KILLFOCUS(IDC_EDIT_PERCENT_SIZE, &CPPRecoverySize::OnEnKillfocusEditPercentSize)
 	ON_BN_CLICKED(IDC_BTN_RECOVER_PATH, &CPPRecoverySize::OnBnClickedBtnRecoverPath)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_PERCENT, &CPPRecoverySize::OnNMCustomdrawSliderPercent)
 END_MESSAGE_MAP()
 
 
@@ -56,7 +53,9 @@ BOOL CPPRecoverySize::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	
-	m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(double(m_nRecSizePercent)+0.5)*0.01/double(1024*1024));
+	m_cSliderPercent.SetRange(1, 50);
+	m_nSliderPercent = 10;
+	m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024*1024));
 	m_szFolder = g_Protector.m_szPath;
 	m_szRecFile = m_szFolder + "Directory.rcv";
 
@@ -89,46 +88,32 @@ void CPPRecoverySize::InvalidateControls()
 	else
 		psheet->SetWizardButtons(PSWIZB_FINISH);
 
-	if (m_nRadio==0)
+	if (g_Protector.m_nTotalSize>0)
 	{
-		GetDlgItem(IDC_EDIT_REC_SIZE)->EnableWindow(TRUE);
-		GetDlgItem(IDC_SLIDER_PERCENT)->EnableWindow(FALSE);
-		GetDlgItem(IDC_EDIT_PERCENT_SIZE)->EnableWindow(FALSE);
-
-		if (g_Protector.m_nTotalSize>0)
+		CString szPercent;
+		double percent = (double(m_nRecSizeMB)/(double(g_Protector.m_nTotalSize)/double(1024*1024)))*100.;
+		int nPercent = int(percent+0.5);
+		if (nPercent!=m_nSliderPercent)
 		{
-			double percent = (double(m_nRecSizeMB)/(double(g_Protector.m_nTotalSize)/double(1024*1024)))*100.;
-			m_nRecSizePercent = int(percent+0.5);
+			if (nPercent>1 && nPercent<=50)
+			{
+				m_nSliderPercent = nPercent;
+			}
+			else
+			{
+				if (nPercent<=1)
+					m_nSliderPercent = 1;
+				if (nPercent>=50)
+					m_nSliderPercent = 50;				
+			}
 		}
+		szPercent.Format(_T("%d %%"), nPercent);
+		GetDlgItem(IDC_STATIC_PERCENT)->SetWindowText(szPercent);
 	}
-	else
-	{
-		GetDlgItem(IDC_EDIT_REC_SIZE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_SLIDER_PERCENT)->EnableWindow(TRUE);
-		GetDlgItem(IDC_EDIT_PERCENT_SIZE)->EnableWindow(FALSE);
 
-		if (m_nRecSizePercent>50) m_nRecSizePercent = 50;
-
-		if (g_Protector.m_nTotalSize>0)
-		{
-			double percent = (double(m_nRecSizePercent)+0.5)*0.01;
-			m_nRecSizeMB = int((double(g_Protector.m_nTotalSize)*percent)/double(1024*1024));
-			if (m_nRecSizeMB==0) m_nRecSizeMB=1;
-		}
-	}
 	UpdateData(FALSE);
 }
 
-
-void CPPRecoverySize::OnBnClickedRadio1()
-{
-	InvalidateControls();
-}
-
-void CPPRecoverySize::OnBnClickedRadio2()
-{
-	InvalidateControls();
-}
 
 void CPPRecoverySize::OnEnKillfocusEditRecSize()
 {
@@ -152,4 +137,23 @@ void CPPRecoverySize::OnBnClickedBtnRecoverPath()
 	m_szRecFile = dlg.GetPathName();
 	UpdateData(FALSE);
 
+}
+
+void CPPRecoverySize::OnNMCustomdrawSliderPercent(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	*pResult = 0;
+
+	if (g_Protector.m_nTotalSize>0)
+	{
+		UpdateData(TRUE);
+		double percent = (double(m_nSliderPercent)+0.5)*0.01;
+		m_nRecSizeMB = int((double(g_Protector.m_nTotalSize)*percent)/double(1024*1024));
+		if (m_nRecSizeMB==0) m_nRecSizeMB=1;
+
+		CString szPercent;
+		szPercent.Format(_T("%d %%"), m_nSliderPercent);
+		GetDlgItem(IDC_STATIC_PERCENT)->SetWindowText(szPercent);
+		UpdateData(FALSE);		
+	}
 }
