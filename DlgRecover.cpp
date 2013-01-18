@@ -223,13 +223,13 @@ void CDlgRecover::InvalidateControls()
 
 	if (m_bInPlace)
 	{
-		GetDlgItem(IDC_CHK_SUBDIRS)->EnableWindow(FALSE);
+		//GetDlgItem(IDC_CHK_SUBDIRS)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EDIT_RECOVER_PATH2)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BTN_RECOVER_PATH)->EnableWindow(FALSE);
 	}
 	else
 	{
-		GetDlgItem(IDC_CHK_SUBDIRS)->EnableWindow(TRUE);
+		//GetDlgItem(IDC_CHK_SUBDIRS)->EnableWindow(TRUE);
 		GetDlgItem(IDC_EDIT_RECOVER_PATH2)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BTN_RECOVER_PATH)->EnableWindow(TRUE);
 	}
