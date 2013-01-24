@@ -132,7 +132,6 @@ BOOL CDlgWelcome::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	/*
 	CString szCmdLine = AfxGetApp()->m_lpCmdLine;
 	if (szCmdLine!="")
 	{
@@ -148,8 +147,7 @@ BOOL CDlgWelcome::OnInitDialog()
 		
 		m_szArgFileName = szRecFile;
 		int rc = RunAsync(trdLoadRecovery);
-
-	}*/
+	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -556,7 +554,7 @@ void CDlgWelcome::OnComplete()
 				CDlgCheckFiles dlg2;
 				int ret = dlg2.DoModal();
 
-				if (ret==2)
+				if (ret==100)
 				{
 					nStep--;
 					continue;

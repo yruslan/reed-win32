@@ -114,7 +114,7 @@ void CDlgCheckFiles::OnBnClickedBtnQuickCheck()
 
 void CDlgCheckFiles::OnBnClickedBtnBack()
 {
-	EndDialog(2);
+	EndDialog(100);
 }
 
 void CDlgCheckFiles::UpdateList()
