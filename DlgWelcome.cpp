@@ -91,6 +91,7 @@ BEGIN_MESSAGE_MAP(CDlgWelcome, CDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_PAINT()
 	ON_BN_CLICKED(IDC_BTN_ABOUT, &CDlgWelcome::OnBnClickedBtnAbout)
+	ON_BN_CLICKED(IDC_BTN_PROTECT_FILES, &CDlgWelcome::OnBnClickedBtnProtectFiles)
 	ON_BN_CLICKED(IDC_BTN_PROTECT_DIR, &CDlgWelcome::OnBnClickedBtnProtectDir)
 	ON_COMMAND(ID_CUSTOM_COMPLETED, &CDlgWelcome::OnComplete)
 	ON_BN_CLICKED(IDC_BTN_CHECK, &CDlgWelcome::OnBnClickedBtnCheck)
@@ -240,6 +241,53 @@ void CDlgWelcome::OnBnClickedBtnProtectDir()
 
 	m_szArgDir = szFolder;
 	int rc = RunAsync(trdAddDir);
+}
+
+void CDlgWelcome::OnBnClickedBtnProtectFiles()
+{
+	g_Protector.Clear();
+
+	//Select files to protect
+	CFileDialog dlg(TRUE, _T("All"), _T("*.*"), OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT, _T("All Files(*.*)|*.*||") );
+
+	int ret = dlg.DoModal();
+
+	if (ret!=IDOK) return;
+
+	//Add files
+	POSITION p=dlg.GetStartPosition();
+	CString s;
+	bool bHaveRcv = false;
+	while (p!=NULL)
+	{
+		s=dlg.GetNextPathName(p);
+		if (s.Right(4)==_T(".rcv"))
+		{
+			bHaveRcv = true;
+			continue;
+		}
+		int ret = g_Protector.AddFileInfo(s);
+		if (ret!=0)
+		{
+			CString msg;
+			msg.Format(_T("Unable to read file '%s'!"), s);
+			MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+			return;
+		}
+	}
+
+	if (g_Protector.m_arFiles.GetSize()==0)
+	{
+		if (bHaveRcv)
+			MessageBox(_T("You are asking to protect a recovery info file. Please, select different file."),_T("Error"), MB_ICONEXCLAMATION);
+		else
+			MessageBox(_T("No files selected!"),_T("Error"), MB_ICONEXCLAMATION);
+		return;
+	}
+
+	m_nReturnValue = 0;
+	m_nOperationType = _OP_ADDDIR;
+	OnComplete();
 }
 
 void CDlgWelcome::OnBnClickedBtnCheck()
@@ -425,20 +473,29 @@ void CDlgWelcome::OnComplete()
 	{
 		if (rc!=0)
 		{
+			g_Protector.Clear();
 			if (rc == -1)
 			{
 				CString msg;
 				msg.Format(_T("Too small size. Cannot continue!"));
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+				return;
 			}
 			if (rc == -2)
 			{
 				CString msg;
 				msg.Format(_T("No Files Selected. Cannot continue!"));
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+				return;
 			}
-			g_Protector.Clear();
-			return; 
+			if (rc == E_FILE_CANNOT_WRITE)
+			{
+				CString msg;
+				msg.Format(_T("Unable to write to the recovery file '%s'!"), m_szArgFileName);
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+				return;
+			}			
+			return;
 		}
 
 		CString msg;

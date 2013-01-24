@@ -70,7 +70,27 @@ BOOL CPPRecoverySize::OnInitDialog()
 	m_nSliderPercent = 10;
 	m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024*1024));
 	m_szFolder = g_Protector.m_szPath;
-	m_szRecFile = m_szFolder + "Directory.rcv";
+	if (m_szFolder!=_T(""))
+		m_szRecFile = m_szFolder + "Directory.rcv";
+	else
+	{
+		//Path of a file
+		if (g_Protector.m_arFiles.GetSize()>0)
+		{
+			CString szFile0 = g_Protector.m_arFiles[0].szName;
+			int pos = szFile0.ReverseFind('\\');
+			CString szXPath=_T(".\\");
+			if (pos>0)
+				szXPath = szFile0.Left(pos+1);
+
+			m_szFolder = szXPath;
+		}
+
+		if (g_Protector.m_arFiles.GetSize()==1)
+			m_szRecFile = CString(g_Protector.m_arFiles[0].szName) + _T(".rcv");
+		else
+			m_szRecFile = m_szFolder + _T("Files.rcv");
+	}
 
 	UpdateData(FALSE);
 

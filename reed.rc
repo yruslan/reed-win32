@@ -165,7 +165,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Welcome to the data protection on a unreliable media!",IDC_STATIC,63,9,185,10
     LTEXT           "This program enrures integrity of your data by checksuming its contents and also adding a redundant recovery info that can be used later to recover the corrupted bits. The larger is recovery info the bigger damage can be restored.",IDC_STATIC,7,21,288,27
-    PUSHBUTTON      "Protect individual files",IDC_BTN_PROTECT_FILES,7,54,103,23,WS_DISABLED
+    PUSHBUTTON      "Protect individual files",IDC_BTN_PROTECT_FILES,7,54,103,23
     LTEXT           "You can protect individual files (i.e. archives) from damage and later recover if needed.",IDC_STATIC,116,55,172,18
     PUSHBUTTON      "Protect a directory tree",IDC_BTN_PROTECT_DIR,7,93,103,23
     LTEXT           "You can protect a directory tree (i.e. contents of a DVD) from damage and later recover if needed.",IDC_STATIC,115,94,173,20

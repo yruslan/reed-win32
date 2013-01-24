@@ -65,6 +65,7 @@ protected:
 	afx_msg void OnPaint();
 
 public:
+	afx_msg void OnBnClickedBtnProtectFiles();
 	afx_msg void OnBnClickedBtnProtectDir();
 	afx_msg void OnBnClickedBtnAbout();
 	afx_msg void OnComplete();
