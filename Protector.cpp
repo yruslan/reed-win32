@@ -1389,7 +1389,12 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 				//Copying file...
 				int rc = CopyFile(fi.szName, szFileName, FALSE);
 				if (rc==0)
+				{
+					if (buf_rec!=NULL) delete [] buf_rec;
+					if (buf_sum!=NULL) delete [] buf_sum;
+					if (buf_file!=NULL) delete [] buf_file;
 					return E_COPY_FAILED;
+				}
 				bUpdateNow=true;
 			}
 

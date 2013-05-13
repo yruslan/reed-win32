@@ -576,6 +576,35 @@ void CDlgWelcome::OnComplete()
 			break;
 		}
 	}
+	if (m_nOperationType==_OP_RECOVER)
+	{
+		if (rc==0)
+		{
+			CString msg;
+			msg.Format(_T("Files are successfully recovered!"));
+			MessageBox(msg,_T("Information"), MB_ICONINFORMATION);
+		}
+		else
+		{
+			CString msg;
+			if (rc==E_COPY_FAILED)
+			{
+				msg.Format(_T("Unable to write to output directory!\n")
+					       _T("Please, choose an empty directory with write access to save recovered files ")
+						   _T("or set \"Recover In-Place\" checkbox.\n"));
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+				
+				// Back to recover dialog
+				m_nOperationType=_OP_CHECKFILES;
+			}
+			else
+			{
+				msg.Format(_T("Recover failed!"));
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+				return;
+			}			
+		}		
+	}
 	if (m_nOperationType==_OP_CHECKFILES)
 	{
 		if (rc==0)
@@ -620,31 +649,4 @@ void CDlgWelcome::OnComplete()
 		}
 		return;
 	}
-	if (m_nOperationType==_OP_RECOVER)
-	{
-		if (rc==0)
-		{
-			CString msg;
-			msg.Format(_T("Files are successfully recovered!"));
-			MessageBox(msg,_T("Information"), MB_ICONINFORMATION);
-		}
-		else
-		{
-			CString msg;
-			if (rc==E_COPY_FAILED)
-			{
-				msg.Format(_T("Unable to write to output directory!\n")
-					       _T("Please, choose an empty directory with write access to save recovered files ")
-						   _T("or set \"Recover In-Place\" checkbox.\n"));
-				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
-			}
-			else
-			{
-				msg.Format(_T("Recover failed!"));
-				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
-			}
-		}
-		return;
-	}
-
 }

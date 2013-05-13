@@ -95,7 +95,7 @@ BEGIN
     LTEXT           "Reed-Solomon Data Protection",IDC_STATIC,45,11,119,8,SS_NOPREFIX
     LTEXT           "by Ruslan Yushchenko, 2009-2013",IDC_STATIC,45,23,119,8
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
-    LTEXT           "Version 2.00, licenced under GPL v2",IDC_STATIC,45,38,119,8
+    LTEXT           "Version 2.0.1, licenced under GPL v2",IDC_STATIC,45,38,119,8
 END
 
 IDD_REED_DIALOG DIALOGEX 0, 0, 487, 274
@@ -271,8 +271,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,0,0
- PRODUCTVERSION 2,0,0,0
+ FILEVERSION 2,0,1,0
+ PRODUCTVERSION 2,0,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -289,12 +289,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Ruslan Yushchenko"
             VALUE "FileDescription", "Reed-Solomon Files Protection"
-            VALUE "FileVersion", "2, 0, 0, 0"
+            VALUE "FileVersion", "2, 0, 1, 0"
             VALUE "InternalName", "reed"
             VALUE "LegalCopyright", "Open Source Software"
             VALUE "OriginalFilename", "reed.exe"
             VALUE "ProductName", "Reed-Solomon Files Protection"
-            VALUE "ProductVersion", "2, 0, 0, 0"
+            VALUE "ProductVersion", "2, 0, 1, 0"
         END
     END
     BLOCK "VarFileInfo"
