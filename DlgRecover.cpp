@@ -51,6 +51,15 @@ BOOL CDlgRecover::OnInitDialog()
 	if (pos>0)
 		szXPath = szRcvPath.Left(pos+1);
 
+	
+	// If trying to recover into original path
+	// set temporary path by default
+	if (szXPath==g_Protector.m_szPath || _tcscmp(g_Protector.m_szPath,_T(""))==0)
+	{
+		GetTempPath(255, szXPath.GetBuffer(255));				
+		szXPath.ReleaseBuffer();
+	}
+
 	m_szRecoverPath = szXPath;
 
 	CClientDC dc((CWnd *)&m_lstFiles);

@@ -59,7 +59,7 @@ BOOL CDlgCheckPath::OnInitDialog()
 	GetDlgItem(IDC_STATIC_SIZE)->SetFont(&m_pBoldFont, TRUE);
 
 	int nOrigSize = (int)(g_Protector.m_nTotalSize/(1024*1024));
-	HumanReadibleMegabytes(nOrigSize, m_szOrigSize);
+	HumanReadableMegabytes(nOrigSize, m_szOrigSize);
 	//m_szOrigSize.Format(_T("%d MB"), nOrigSize);
 	if (g_Protector.m_szPath!=_T(""))
 	{

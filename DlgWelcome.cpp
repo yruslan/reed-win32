@@ -631,8 +631,18 @@ void CDlgWelcome::OnComplete()
 		else
 		{
 			CString msg;
-			msg.Format(_T("Recover failed!"));
-			MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+			if (rc==E_COPY_FAILED)
+			{
+				msg.Format(_T("Unable to write to output directory!\n")
+					       _T("Please, choose an empty directory with write access to save recovered files ")
+						   _T("or set \"Recover In-Place\" checkbox.\n"));
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+			}
+			else
+			{
+				msg.Format(_T("Recover failed!"));
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+			}
 		}
 		return;
 	}

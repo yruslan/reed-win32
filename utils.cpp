@@ -23,7 +23,7 @@ void NumbersToBytes(int blocks, int block_size, CString &msg)
 	}
 }
 
-void HumanReadibleMegabytes(int nMB, CString &msg)
+void HumanReadableMegabytes(int nMB, CString &msg)
 {
 	if (nMB<1024)
 		msg.Format(_T("%d MB"),  nMB);

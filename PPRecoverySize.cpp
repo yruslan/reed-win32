@@ -104,7 +104,7 @@ BOOL CPPRecoverySize::OnSetActive()
 	m_szFiles.Format(_T("%d"), g_Protector.m_arFiles.GetSize());
 	//m_szSize.Format(_T("%d MB"), int(double(g_Protector.m_nTotalSize)/double(1024*1024)));
 	int nMB = int(double(g_Protector.m_nTotalSize)/double(1024*1024));
-	HumanReadibleMegabytes(nMB, m_szSize);
+	HumanReadableMegabytes(nMB, m_szSize);
 	
 	UpdateData(FALSE);
 
