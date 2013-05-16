@@ -2,7 +2,7 @@
 Copyright (c) 2009-2013, Ruslan Yushchenko
 All rights reserved.
 
-Distributed via 3-clause BSD (aka new BSD) license
+Distributed via 3-clause BSD (aka New BSD) license
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
