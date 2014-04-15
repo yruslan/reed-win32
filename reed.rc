@@ -86,16 +86,16 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 264, 58
+IDD_ABOUTBOX DIALOGEX 0, 0, 266, 70
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About reed"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,14,15,20,20
-    LTEXT           "Unreliable Media Data Protection and Recovery",IDC_STATIC,45,11,158,8,SS_NOPREFIX
-    LTEXT           "by Ruslan Yushchenko, 2009-2013",IDC_STATIC,45,23,119,8
-    DEFPUSHBUTTON   "OK",IDOK,207,7,50,14,WS_GROUP
-    LTEXT           "Version 2.0.1, distributed via New BSD license",IDC_STATIC,45,38,147,8
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,15,21,20
+    LTEXT           "Data protection and recovery utility for unreliable storage media",IDC_STATIC,45,11,143,18,SS_NOPREFIX
+    LTEXT           "(C) Ruslan Yushchenko, 2009-2014",IDC_STATIC,45,33,119,8
+    DEFPUSHBUTTON   "OK",IDOK,208,7,50,14,WS_GROUP
+    LTEXT           "Version 2.0.2, distributed via New BSD license",IDC_STATIC,45,48,147,8
 END
 
 IDD_REED_DIALOG DIALOGEX 0, 0, 487, 274
@@ -160,19 +160,19 @@ END
 IDD_DLG_WELCOME DIALOGEX 0, 0, 302, 244
 STYLE DS_ABSALIGN | DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Unreliable Media Data Protection and Recovery"
+CAPTION "Reed - Data Protection and Recovery"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "Welcome to the data protection on a unreliable media!",IDC_STATIC,63,9,185,10
-    LTEXT           "This program enrures integrity of your data by checksuming its contents and also adding a redundant recovery info that can be used later to recover the corrupted bits. The larger is recovery info the bigger damage can be restored.",IDC_STATIC,7,21,288,27
+    CTEXT           "Welcome to the data protection utility for unreliable storage media!",IDC_STATIC,29,9,247,10
+    LTEXT           "This program enrures integrity of your data by checksuming its contents and also adding a redundant recovery info that can be used later to recover the corrupted fragments. The larger is recovery info the bigger damage can be restored.",IDC_STATIC,7,21,288,27
     PUSHBUTTON      "Protect individual files",IDC_BTN_PROTECT_FILES,7,54,103,23
-    LTEXT           "You can protect individual files (i.e. archives) from damage and later recover if needed.",IDC_STATIC,116,55,172,18
+    LTEXT           "You can protect individual files (i.e. archives) from a content corruption to be able to recover later if needed.",IDC_STATIC,116,55,172,24
     PUSHBUTTON      "Protect a directory tree",IDC_BTN_PROTECT_DIR,7,93,103,23
-    LTEXT           "You can protect a directory tree (i.e. contents of a DVD) from damage and later recover if needed.",IDC_STATIC,115,94,173,20
+    LTEXT           "You can protect a directory tree (i.e. contents of a DVD) from content corruption to recover later if needed.",IDC_STATIC,115,94,173,26
     PUSHBUTTON      "Check and recover",IDC_BTN_CHECK,7,134,103,23
-    LTEXT           "You can check if protected files were changed and recover if possible.",IDC_STATIC,115,135,173,20
+    LTEXT           "You can check if protected files were changed and recover (restore previous content) if possible.",IDC_STATIC,115,135,173,21
     PUSHBUTTON      "Copy from damaged media",IDC_BTN_COPY_DAMAGED,7,173,103,23,WS_DISABLED
-    LTEXT           "You can copy from a damaged media if you encounter media read errors (i.e. CD/DVD is scratched)",IDC_STATIC,116,176,173,20
+    LTEXT           "You can copy from a damaged media if you encounter media read errors (i.e. if CD/DVD is scratched)",IDC_STATIC,116,176,173,20
     PUSHBUTTON      "About",IDC_BTN_ABOUT,7,221,53,16
     PUSHBUTTON      "Exit",IDCANCEL,242,221,53,16
 END
@@ -271,8 +271,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,1,0
- PRODUCTVERSION 2,0,1,0
+ FILEVERSION 2,0,2,0
+ PRODUCTVERSION 2,0,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -289,12 +289,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Ruslan Yushchenko"
             VALUE "FileDescription", "Protect files to be stored on unreliable media"
-            VALUE "FileVersion", "2, 0, 1, 0"
+            VALUE "FileVersion", "2, 0, 2, 0"
             VALUE "InternalName", "reed"
-            VALUE "LegalCopyright", "2009-2013 (C) Ruslan Yushchenko"
+            VALUE "LegalCopyright", "2009-2014 (C) Ruslan Yushchenko"
             VALUE "OriginalFilename", "reed.exe"
             VALUE "ProductName", "DVD Protect&Recover"
-            VALUE "ProductVersion", "2, 0, 1, 0"
+            VALUE "ProductVersion", "2, 0, 2, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -315,9 +315,9 @@ BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 257
+        RIGHTMARGIN, 258
         TOPMARGIN, 7
-        BOTTOMMARGIN, 51
+        BOTTOMMARGIN, 63
     END
 
     IDD_REED_DIALOG, DIALOG
