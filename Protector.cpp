@@ -122,6 +122,7 @@ void CProtector::Clear()
 		delete [] m_szRecovery;
 		m_szRecovery = NULL;
 	}
+	_tcscpy(m_szPath, _T(""));
 	m_blbCRC.SetSize(0);
 	m_nRecoveryBlockSize = BLOCK_SIZE;
 	m_nRecoverySize = 10485760;
