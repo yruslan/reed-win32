@@ -603,11 +603,22 @@ void CDlgWelcome::OnComplete()
 			MessageBox(_T("Failed to scan directory!"),_T("Error"), MB_ICONEXCLAMATION);
 			return;
 		}
+		if (g_Protector.m_nTotalSize < 10000)
+		{
+			MessageBox(_T("Total size of selected file(s) is too small for this protection to be practical (<10KB)."), _T("Error"), MB_ICONEXCLAMATION);
+			return;
+		}
 
 		CPropertySheet pS;
 
 		pS.m_psh.dwFlags &= ~PSH_HASHELP;
 		CPPRecoverySize p1;
+
+		// For small files
+		if (g_Protector.m_nTotalSize < 5000000)
+			p1.m_bSizeInMB = false;
+		else
+			p1.m_bSizeInMB = true;
 
 		p1.m_psp.dwFlags &= ~PSP_HASHELP;
 
@@ -632,8 +643,16 @@ void CDlgWelcome::OnComplete()
 
 		g_Protector.m_nRecoveryBlockSize = block_size*1024;
 
+		if (p1.m_bSizeInMB)
+		{
+			m_nArgSize = ((FILESIZE)rec_size)*1024*1024;
+		}
+		else
+		{
+			g_Protector.m_nRecoveryBlockSize = 512;
+			m_nArgSize = ((FILESIZE)rec_size)*1024;
+		}
 		m_szArgFileName = p1.m_szRecFile;
-		m_nArgSize = ((FILESIZE)rec_size)*1024*1024;
 		int rc = RunAsync(trdProtectDir);
 	}
 

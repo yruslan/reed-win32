@@ -193,7 +193,7 @@ BEGIN
     GROUPBOX        " Recovery Info Size ",IDC_STATIC,7,72,283,52
     CONTROL         "",IDC_SLIDER_PERCENT,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,17,88,193,19
     EDITTEXT        IDC_EDIT_REC_SIZE,213,88,42,13,ES_AUTOHSCROLL
-    LTEXT           "MB",IDC_STATIC,258,90,20,8
+    LTEXT           "MB",IDC_STATIC_MB,258,90,20,8
     CTEXT           "%",IDC_STATIC_PERCENT,103,108,51,8
     GROUPBOX        " Save recovery info ",IDC_STATIC,7,128,283,48
     LTEXT           "Recovery info file will be placed to",IDC_STATIC,20,142,119,9

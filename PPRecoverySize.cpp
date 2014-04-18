@@ -47,6 +47,7 @@ CPPRecoverySize::CPPRecoverySize()
 	m_szFiles = _T("");
 	m_szSize = _T("");
 	m_nRecSizeMB = 100;
+	m_bSizeInMB = true;
 }
 
 CPPRecoverySize::~CPPRecoverySize()
@@ -91,10 +92,18 @@ BOOL CPPRecoverySize::OnInitDialog()
 	GetDlgItem(IDC_STATIC_DIR)->SetFont(&m_pBoldFont, TRUE);
 	GetDlgItem(IDC_STATIC_FILES)->SetFont(&m_pBoldFont, TRUE);
 	GetDlgItem(IDC_STATIC_SIZE)->SetFont(&m_pBoldFont, TRUE);
+
+	if (m_bSizeInMB)
+		GetDlgItem(IDC_STATIC_MB)->SetWindowTextW(_T("MB"));
+	else
+		GetDlgItem(IDC_STATIC_MB)->SetWindowTextW(_T("KB"));
 	
 	m_cSliderPercent.SetRange(1, 50);
 	m_nSliderPercent = 10;
-	m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024*1024));
+	if (m_bSizeInMB)
+		m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024*1024));
+	else
+		m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024));
 	m_szFolder = g_Protector.m_szPath;
 	if (m_szFolder!=_T(""))
 	{
@@ -141,8 +150,13 @@ BOOL CPPRecoverySize::OnSetActive()
 {
 	m_szFiles.Format(_T("%d"), g_Protector.m_arFiles.GetSize());
 	//m_szSize.Format(_T("%d MB"), int(double(g_Protector.m_nTotalSize)/double(1024*1024)));
-	int nMB = int(double(g_Protector.m_nTotalSize)/double(1024*1024));
-	HumanReadableMegabytes(nMB, m_szSize);
+	if (g_Protector.m_nTotalSize>10000000)
+	{
+		int nMB = int(double(g_Protector.m_nTotalSize)/double(1024*1024));
+		HumanReadableMegabytes(nMB, m_szSize);
+	}
+	else
+		NumbersToBytes((int)g_Protector.m_nTotalSize, 1, m_szSize);
 	
 	UpdateData(FALSE);
 
@@ -164,7 +178,13 @@ void CPPRecoverySize::InvalidateControls()
 	if (g_Protector.m_nTotalSize>0)
 	{
 		CString szPercent;
-		double percent = (double(m_nRecSizeMB)/(double(g_Protector.m_nTotalSize)/double(1024*1024)))*100.;
+		double percent;
+
+		if (m_bSizeInMB)
+			percent = (double(m_nRecSizeMB)/(double(g_Protector.m_nTotalSize)/double(1024*1024)))*100.;
+		else
+			percent = (double(m_nRecSizeMB)/(double(g_Protector.m_nTotalSize)/double(1024)))*100.;
+
 		int nPercent = int(percent+0.5);
 		if (nPercent!=m_nSliderPercent)
 		{
@@ -221,7 +241,10 @@ void CPPRecoverySize::OnNMCustomdrawSliderPercent(NMHDR *pNMHDR, LRESULT *pResul
 	{
 		UpdateData(TRUE);
 		double percent = (double(m_nSliderPercent)+0.5)*0.01;
-		m_nRecSizeMB = int((double(g_Protector.m_nTotalSize)*percent)/double(1024*1024));
+		if (m_bSizeInMB)
+			m_nRecSizeMB = int((double(g_Protector.m_nTotalSize)*percent)/double(1024*1024));
+		else
+			m_nRecSizeMB = int((double(g_Protector.m_nTotalSize)*percent)/double(1024));
 		if (m_nRecSizeMB==0) m_nRecSizeMB=1;
 
 		CString szPercent;

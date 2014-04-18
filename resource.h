@@ -67,6 +67,7 @@
 #define IDC_BTN_BACK                    1040
 #define IDC_EDIT_SRC_PATH               1041
 #define IDC_STATIC_MSG                  1042
+#define IDC_STATIC_MB                   1043
 #define IDC_GROUP_ALL                   65535
 
 // Next default values for new objects
@@ -75,7 +76,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        138
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1043
+#define _APS_NEXT_CONTROL_VALUE         1044
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

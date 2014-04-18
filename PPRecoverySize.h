@@ -64,6 +64,7 @@ public:
 	int m_nRecSizeMB;
 	int m_nSliderPercent;
 	CSliderCtrl m_cSliderPercent;
+	bool m_bSizeInMB; // true - in megabytes, false - in kilobytes
 
 	afx_msg void OnEnKillfocusEditRecSize();
 	afx_msg void OnEnKillfocusEditPercentSize();
