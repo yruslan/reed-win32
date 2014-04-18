@@ -68,6 +68,8 @@ public:
 	//Arguments
 	CString m_szArgFileName;
 	CString m_szArgDir;
+	CStringArray m_szArgArFiles;
+	CStringArray m_szArgArDirs;
 	FILESIZE m_nArgSize;
 	int m_nOperationType;
 	int m_nReturnValue;
@@ -76,6 +78,7 @@ public:
 	//Async functions
 	static unsigned _stdcall trdLoadRecovery (LPVOID lpParameter);
 	static unsigned _stdcall trdAddDir (LPVOID lpParameter);
+	static unsigned _stdcall trdFilesAndDirs (LPVOID lpParameter);
 	static unsigned _stdcall trdCheckFiles (LPVOID lpParameter);
 	static unsigned _stdcall trdProtectFiles (LPVOID lpParameter);
 	static unsigned _stdcall trdProtectDir (LPVOID lpParameter);

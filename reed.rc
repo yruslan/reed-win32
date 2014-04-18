@@ -91,11 +91,11 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About reed"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,14,15,21,20
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,15,20,20
     LTEXT           "Data protection and recovery utility for unreliable storage media",IDC_STATIC,45,11,143,18,SS_NOPREFIX
     LTEXT           "(C) Ruslan Yushchenko, 2009-2014",IDC_STATIC,45,33,119,8
     DEFPUSHBUTTON   "OK",IDOK,208,7,50,14,WS_GROUP
-    LTEXT           "Version 2.0.2, distributed via New BSD license",IDC_STATIC,45,48,147,8
+    LTEXT           "Version 2.0.3, distributed via New BSD license",IDC_STATIC,45,48,147,8
 END
 
 IDD_REED_DIALOG DIALOGEX 0, 0, 487, 274
@@ -271,8 +271,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,2,0
- PRODUCTVERSION 2,0,2,0
+ FILEVERSION 2,0,3,0
+ PRODUCTVERSION 2,0,3,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -289,12 +289,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Ruslan Yushchenko"
             VALUE "FileDescription", "Protect files to be stored on unreliable media"
-            VALUE "FileVersion", "2, 0, 2, 0"
+            VALUE "FileVersion", "2, 0, 3, 0"
             VALUE "InternalName", "reed"
             VALUE "LegalCopyright", "2009-2014 (C) Ruslan Yushchenko"
             VALUE "OriginalFilename", "reed.exe"
             VALUE "ProductName", "DVD Protect&Recover"
-            VALUE "ProductVersion", "2, 0, 2, 0"
+            VALUE "ProductVersion", "2, 0, 3, 0"
         END
     END
     BLOCK "VarFileInfo"

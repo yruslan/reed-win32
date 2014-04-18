@@ -159,20 +159,104 @@ BOOL CDlgWelcome::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	CString szCmdLine = AfxGetApp()->m_lpCmdLine;
+
 	if (szCmdLine!="")
 	{
-		CString szRecFile = szCmdLine; 
-		if (szCmdLine.GetLength()>2)
+		CStringArray arRecFiles;
+		CStringArray arProtectFiles;
+		CStringArray arProtectDirs;
+
+		CStringArray arInParams;
+
+		CString szSeps = _T(" ");
+		if (szCmdLine.Find(_T("\""))>=0)
+			szSeps = _T("\"");
+
+		// Debug print command line
+		//CString msg;
+		//msg.Format(_T("'%s'"), szCmdLine);
+		//MessageBox(msg, _T("CMD"), 0);
+
+		int curPos = 0;
+		CString szToken = szCmdLine.Tokenize(szSeps, curPos);
+		while (szToken != "")
 		{
-			if (szRecFile.Left(1)=="\"" && szRecFile.Right(1)=="\"")
+			// If the token is a recovery info file name
+			if (szToken.GetLength()>4 && !szToken.Right(4).CompareNoCase(_T(".rcv")))
 			{
-				szRecFile = szRecFile.Left(szRecFile.GetLength()-1);
-				szRecFile = szRecFile.Right(szRecFile.GetLength()-1);
+				arRecFiles.Add(szToken);
+			}
+			else
+			{
+				// If the token is an ordinary file or directory name
+				WIN32_FIND_DATA fd;
+				HANDLE  hFind = FindFirstFile(szToken, &fd);
+				if (hFind != INVALID_HANDLE_VALUE)
+				{
+					if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) > 0)
+						arProtectDirs.Add(szToken);
+					else
+					{
+						// Skip zero-sized files
+						if (fd.nFileSizeHigh>0 || fd.nFileSizeLow>0)
+							arProtectFiles.Add(szToken);
+					}
+					FindClose(hFind);
+				}
+			}
+			szToken = szCmdLine.Tokenize(szSeps, curPos);
+		}
+
+		// If have at least one directory
+		if (arProtectDirs.GetSize()>0)
+		{
+			if (arProtectDirs.GetSize()>1 || arProtectFiles.GetSize()>0)
+			{
+				m_szArgArFiles.Copy(arProtectFiles);
+				m_szArgArDirs.Copy(arProtectDirs);
+				int rc = RunAsync(trdFilesAndDirs);
+			}
+			else
+			{
+				// Start directory protection dialog
+				m_szArgDir = arProtectDirs[0];
+				int rc = RunAsync(trdAddDir);
 			}
 		}
-		
-		m_szArgFileName = szRecFile;
-		int rc = RunAsync(trdLoadRecovery);
+		// If have at least one file to protect
+		else if (arProtectFiles.GetSize()>0)
+		{
+			for (int i=0; i<arProtectFiles.GetSize(); i++)
+			{
+				int ret = g_Protector.AddFileInfo(arProtectFiles[i]);
+				if (ret!=0)
+				{
+					CString msg;
+					msg.Format(_T("Unable to read file '%s'!"), arProtectFiles[i]);
+					MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+					g_Protector.Clear();
+					break;
+				}				
+			}
+			if (g_Protector.m_arFiles.GetSize()>0)
+			{
+				// Start protection dialog
+				m_nReturnValue = 0;
+				m_nOperationType = _OP_ADDDIR;
+				OnComplete();
+			}
+		}
+		else if (arRecFiles.GetSize()>0)
+		{
+			if (arRecFiles.GetSize()>1)
+				MessageBox(_T("Please, select only one recovery info file a time!"),_T("Error"), MB_ICONEXCLAMATION);
+			else
+			{
+				// Start check and recovery dialog
+				m_szArgFileName = arRecFiles[0];
+				int rc = RunAsync(trdLoadRecovery);
+			}
+		}
 	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -374,6 +458,66 @@ unsigned _stdcall CDlgWelcome::trdAddDir (LPVOID lpParameter)
 
 	d->PostMessage(WM_COMMAND, ID_CUSTOM_COMPLETED);
 
+	return 0;
+}
+
+unsigned _stdcall CDlgWelcome::trdFilesAndDirs (LPVOID lpParameter)
+{
+	//m_szArgArFilesAndDirs
+	if (lpParameter == NULL) return -1;
+	CDlgWelcome *d = (CDlgWelcome * ) lpParameter;
+	d->m_nOperationType = _OP_ADDDIR;
+
+	int rc = 0;
+
+	// Get Minimum Path
+	CString szPath = _T("");
+	if (d->m_szArgArDirs.GetSize()>0)
+		szPath = d->m_szArgArDirs[0];
+	if (d->m_szArgArFiles.GetSize()>0)
+		szPath = d->m_szArgArFiles[0];
+
+	for (int i=0; i<d->m_szArgArFiles.GetSize(); i++)
+	{
+		int j=0;
+		while (j<szPath.GetLength() && j<d->m_szArgArFiles[i].GetLength())
+		{
+			if (szPath[j]!=d->m_szArgArFiles[i][j])
+				break;
+			j++;
+		}
+		szPath = szPath.Left(j);
+	}
+	for (int i=0; i<d->m_szArgArDirs.GetSize(); i++)
+	{
+		int j=0;
+		while (j<szPath.GetLength() && j<d->m_szArgArDirs[i].GetLength())
+		{
+			if (szPath[j]!=d->m_szArgArDirs[i][j])
+				break;
+			j++;
+		}
+		szPath = szPath.Left(j);
+	}
+	_tcscpy(g_Protector.m_szPath, szPath);
+
+	// Add Files
+	for (int i=0; i<d->m_szArgArFiles.GetSize(); i++)
+	{
+		if (!rc) rc |= g_Protector.AddFileInfo(d->m_szArgArFiles[i]);
+	}
+
+	// Add Dirs	
+	for (int i=0; i<d->m_szArgArDirs.GetSize(); i++)
+	{
+		if (!rc) g_Protector.AddDir(d->m_szArgArDirs[i]);
+	}
+
+	::EnterCriticalSection(&d->m_CS);
+	d->m_nReturnValue = rc;
+	::LeaveCriticalSection(&d->m_CS);
+
+	d->PostMessage(WM_COMMAND, ID_CUSTOM_COMPLETED);
 	return 0;
 }
 

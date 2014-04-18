@@ -1867,12 +1867,14 @@ int CProtector::AddDir(LPCTSTR szPath)
 	if (szFolder.Right(1)!='\\')
 		szFolder+="\\";
 
-	m_arFiles.RemoveAll();
-	m_nTotalSize = 0;
+	// Can add additional files and dirs
+	//m_arFiles.RemoveAll();
+	//m_nTotalSize = 0;
 
 	CStringArray szDirList;
 	szDirList.Add(szFolder);
-	_tcscpy(m_szPath, szFolder);
+	if (m_arFiles.GetSize()==0)
+		_tcscpy(m_szPath, szFolder);
 
 #ifdef _INSIDE_MFC_APP
 	FILESIZE pcnt = 0;
