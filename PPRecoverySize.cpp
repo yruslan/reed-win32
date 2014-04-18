@@ -97,7 +97,19 @@ BOOL CPPRecoverySize::OnInitDialog()
 	m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024*1024));
 	m_szFolder = g_Protector.m_szPath;
 	if (m_szFolder!=_T(""))
-		m_szRecFile = m_szFolder + "RecoveryInfo.rcv";
+	{
+		CString szSrcDir = m_szFolder;
+		if (szSrcDir[szSrcDir.GetLength()-1]=='\\')
+			szSrcDir = m_szFolder.Left(szSrcDir.GetLength()-1);
+		
+		CString szDefFileName;
+		int r = szSrcDir.ReverseFind('\\');
+		if (r>0)
+			szDefFileName = szSrcDir.Right(szSrcDir.GetLength()-r-1) + _T("_RecoveryInfo.rcv");
+		else
+			szDefFileName = _T("RecoveryInfo.rcv");
+		m_szRecFile = m_szFolder + szDefFileName;
+	}
 	else
 	{
 		//Path of a file
