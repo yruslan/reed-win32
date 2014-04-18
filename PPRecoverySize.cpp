@@ -97,7 +97,7 @@ BOOL CPPRecoverySize::OnInitDialog()
 	m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024*1024));
 	m_szFolder = g_Protector.m_szPath;
 	if (m_szFolder!=_T(""))
-		m_szRecFile = m_szFolder + "Directory.rcv";
+		m_szRecFile = m_szFolder + "RecoveryInfo.rcv";
 	else
 	{
 		//Path of a file
@@ -115,7 +115,7 @@ BOOL CPPRecoverySize::OnInitDialog()
 		if (g_Protector.m_arFiles.GetSize()==1)
 			m_szRecFile = CString(g_Protector.m_arFiles[0].szName) + _T(".rcv");
 		else
-			m_szRecFile = m_szFolder + _T("Files.rcv");
+			m_szRecFile = m_szFolder + _T("RecoveryInfo.rcv");
 	}
 
 	UpdateData(FALSE);
