@@ -1873,7 +1873,7 @@ int CProtector::AddDir(LPCTSTR szPath)
 
 	CStringArray szDirList;
 	szDirList.Add(szFolder);
-	if (m_arFiles.GetSize()==0)
+	if (m_arFiles.GetSize()==0 && _tcscmp(m_szPath,_T(""))==0)
 		_tcscpy(m_szPath, szFolder);
 
 #ifdef _INSIDE_MFC_APP
