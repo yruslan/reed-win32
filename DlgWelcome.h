@@ -74,6 +74,7 @@ public:
 	int m_nOperationType;
 	int m_nReturnValue;
 	bool m_bCheckNotAll;
+	bool m_bStartedFromCommandLine;
 
 	//Async functions
 	static unsigned _stdcall trdLoadRecovery (LPVOID lpParameter);

@@ -90,7 +90,8 @@ END_MESSAGE_MAP()
 IMPLEMENT_DYNAMIC(CDlgWelcome, CDialog)
 
 CDlgWelcome::CDlgWelcome(CWnd* pParent /*=NULL*/)
-	: CDialog(CDlgWelcome::IDD, pParent)
+	: CDialog(CDlgWelcome::IDD, pParent),
+	m_bStartedFromCommandLine(false)
 {
 	m_bRunning = false;
 	::InitializeCriticalSection(&m_CS);
@@ -172,6 +173,8 @@ BOOL CDlgWelcome::OnInitDialog()
 		if (szCmdLine.Find(_T("\""))>=0)
 			szSeps = _T("\"");
 
+		m_bStartedFromCommandLine = true;
+
 		// Debug print command line
 		//CString msg;
 		//msg.Format(_T("'%s'"), szCmdLine);
@@ -235,7 +238,7 @@ BOOL CDlgWelcome::OnInitDialog()
 					msg.Format(_T("Unable to read file '%s'!"), arProtectFiles[i]);
 					MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
 					g_Protector.Clear();
-					break;
+					AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 				}				
 			}
 			if (g_Protector.m_arFiles.GetSize()>0)
@@ -601,11 +604,15 @@ void CDlgWelcome::OnComplete()
 		if (rc!=0)
 		{
 			MessageBox(_T("Failed to scan directory!"),_T("Error"), MB_ICONEXCLAMATION);
+			if (m_bStartedFromCommandLine)
+				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 			return;
 		}
 		if (g_Protector.m_nTotalSize < 10000)
 		{
 			MessageBox(_T("Total size of selected file(s) is too small for this protection to be practical (<10KB)."), _T("Error"), MB_ICONEXCLAMATION);
+			if (m_bStartedFromCommandLine)
+				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 			return;
 		}
 
@@ -626,7 +633,11 @@ void CDlgWelcome::OnComplete()
 		pS.SetWizardMode();
 
 		if(pS.DoModal() == IDCANCEL)
+		{
+			if (m_bStartedFromCommandLine)
+				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 			return;
+		}
 
 		int rec_size=1;
 
@@ -666,30 +677,30 @@ void CDlgWelcome::OnComplete()
 				CString msg;
 				msg.Format(_T("Too small size. Cannot continue!"));
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
-				return;
 			}
 			if (rc == -2)
 			{
 				CString msg;
 				msg.Format(_T("No Files Selected. Cannot continue!"));
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
-				return;
 			}
 			if (rc == E_FILE_CANNOT_WRITE)
 			{
 				CString msg;
 				msg.Format(_T("Unable to write to the recovery file '%s'!"), m_szArgFileName);
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
-				return;
-			}			
+			}
+			if (m_bStartedFromCommandLine)
+				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 			return;
 		}
 
 		CString msg;
-		msg.Format(_T("Recovery file saved in %s!"), m_szArgFileName);
+		msg.Format(_T("Recovery file saved to '%s'!"), m_szArgFileName);
 		MessageBox(msg,_T("Information"), MB_ICONINFORMATION);
-
 		g_Protector.Clear();
+		if (m_bStartedFromCommandLine)
+			AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 	}
 
 	if (m_nOperationType==_OP_LOADRECOVERY)
@@ -720,10 +731,16 @@ void CDlgWelcome::OnComplete()
 				msg.Format(_T("Unknown format error!"));
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
 			}
+			if (m_bStartedFromCommandLine)
+				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 			return; 
 		}
 		if (g_Protector.m_nTotalSize==0)
+		{
+			if (m_bStartedFromCommandLine)
+				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 			return;
+		}
 
 		//Wizard! Specify the original path and files to check
 		int nStep = 1;
@@ -735,7 +752,11 @@ void CDlgWelcome::OnComplete()
 				int ret = dlg1.DoModal();
 
 				if (ret!=IDOK)
+				{
+					if (m_bStartedFromCommandLine)
+						AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 					return;
+				}
 				nStep++;
 			}
 			if (nStep==2)
@@ -772,6 +793,8 @@ void CDlgWelcome::OnComplete()
 			CString msg;
 			msg.Format(_T("Files are successfully recovered!"));
 			MessageBox(msg,_T("Information"), MB_ICONINFORMATION);
+			if (m_bStartedFromCommandLine)
+				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 		}
 		else
 		{
@@ -790,6 +813,8 @@ void CDlgWelcome::OnComplete()
 			{
 				msg.Format(_T("Recover failed!"));
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+				if (m_bStartedFromCommandLine)
+					AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 				return;
 			}			
 		}		
@@ -799,6 +824,8 @@ void CDlgWelcome::OnComplete()
 		if (rc==0)
 		{
 			MessageBox(_T("Check complete. No errors found!"),_T("Info"), MB_ICONINFORMATION);
+			if (m_bStartedFromCommandLine)
+				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 		}
 		else
 		{

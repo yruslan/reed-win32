@@ -1301,7 +1301,7 @@ void CReedDlg::OnComplete()
 		}
 
 		CString msg;
-		msg.Format(_T("Recovery file saved in %s!"), m_szArgFileName);
+		msg.Format(_T("Recovery file saved to '%s'!"), m_szArgFileName);
 		MessageBox(msg,_T("Information"), MB_ICONINFORMATION);
 
 		rec.Clear();
@@ -1332,7 +1332,7 @@ void CReedDlg::OnComplete()
 			return; 
 		}
 		CString msg;
-		msg.Format(_T("Recovery file saved in %s!"), m_szArgFileName);
+		msg.Format(_T("Recovery file saved in '%s'!"), m_szArgFileName);
 		MessageBox(msg,_T("Information"), MB_ICONINFORMATION);
 	}
 
