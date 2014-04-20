@@ -742,6 +742,19 @@ void CDlgWelcome::OnComplete()
 			return;
 		}
 
+		if (g_Protector.m_arFiles.GetSize()==1)
+		{
+			if (!_taccess(g_Protector.m_arFiles[0].szName, 04))
+			{
+				// Start Checking files
+				t_FileInfo fi = g_Protector.m_arFiles.GetAt(0);
+				fi.checked = 1;
+				g_Protector.m_arFiles.SetAt(0, fi);
+				RunAsync(trdCheckFiles);
+				return;
+			}
+		}
+
 		//Wizard! Specify the original path and files to check
 		int nStep = 1;
 		while (true)
@@ -829,6 +842,9 @@ void CDlgWelcome::OnComplete()
 		}
 		else
 		{
+			if (rc==E_PROTECTOR_TERMINATED)
+				return;
+
 			//Select files to recover
 			//and recover path
 			CDlgRecover dlg;
