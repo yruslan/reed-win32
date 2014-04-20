@@ -558,6 +558,23 @@ unsigned _stdcall CDlgWelcome::trdLoadRecovery (LPVOID lpParameter)
 	return 0;
 }
 
+unsigned _stdcall CDlgWelcome::trdCheckExists (LPVOID lpParameter)
+{
+	if (lpParameter == NULL) return -1;
+	CDlgWelcome *d = (CDlgWelcome * ) lpParameter;
+	d->m_nOperationType = _OP_CHECKEXISTS;
+
+	int rc = g_Protector.CheckFilesExists();
+
+	::EnterCriticalSection(&d->m_CS);
+	d->m_nReturnValue = rc;
+	::LeaveCriticalSection(&d->m_CS);
+
+	d->PostMessage(WM_COMMAND, ID_CUSTOM_COMPLETED);
+
+	return 0;
+}
+
 unsigned _stdcall CDlgWelcome::trdCheckFiles (LPVOID lpParameter)
 {
 	if (lpParameter == NULL) return -1;
@@ -598,6 +615,7 @@ void CDlgWelcome::OnComplete()
 	g_DlgProgress->ShowWindow(SW_HIDE);
 
 	int rc = m_nReturnValue;
+	static int nWizardStep = 1;
 
 	if (m_nOperationType == _OP_ADDDIR)
 	{
@@ -754,12 +772,23 @@ void CDlgWelcome::OnComplete()
 				return;
 			}
 		}
-
+		nWizardStep = 1;
+		m_nOperationType=_OP_CHECKEXISTS;
+	}
+	if (m_nOperationType==_OP_CHECKEXISTS)
+	{
 		//Wizard! Specify the original path and files to check
-		int nStep = 1;
 		while (true)
 		{
-			if (nStep==1)
+			if (nWizardStep==2 && g_Protector.m_nFilesExistCount==0)
+			{
+				CString msg;
+				msg.Format(_T("Selected folder (%s) does not contain any of the source files.\n")
+					_T("Please, specify the source folder again."), g_Protector.m_szPath);
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+				nWizardStep--;
+			}
+			if (nWizardStep==1)
 			{
 				CDlgCheckPath dlg1;
 				int ret = dlg1.DoModal();
@@ -770,16 +799,23 @@ void CDlgWelcome::OnComplete()
 						AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 					return;
 				}
-				nStep++;
+				if (dlg1.m_szSrcPath!=_T(""))
+				{
+					nWizardStep++;
+					_tcscpy(g_Protector.m_szPath, dlg1.m_szSrcPath);
+					RunAsync(trdCheckExists);
+					return;
+				}
+				nWizardStep++;
 			}
-			if (nStep==2)
+			if (nWizardStep==2)
 			{
 				CDlgCheckFiles dlg2;
 				int ret = dlg2.DoModal();
 
 				if (ret==100)
 				{
-					nStep--;
+					nWizardStep--;
 					continue;
 				}
 				if (ret!=IDOK)
@@ -792,7 +828,6 @@ void CDlgWelcome::OnComplete()
 					fi.checked = 1;
 					g_Protector.m_arFiles.SetAt(ret, fi);
 				}
-
 				RunAsync(trdCheckFiles);
 				return;
 			}

@@ -94,6 +94,7 @@ public:
 	int CreateSolidRecovery2(FILESIZE rec_size, LPCTSTR szFileName);
 	int SaveRecovery(LPCTSTR szFileName);
 	int LoadRecovery2(LPCTSTR szFileName);
+	int CheckFilesExists();
 	int Check2();
 	int Recover2(int spec_file=-1);
 	int CheckAndRecoverSmall();
@@ -122,6 +123,9 @@ public:
 	bool m_bCreateSubdirs;
 	CString m_szRecoverPath;
 	CString m_szRecFileName;
+
+	bool m_bAllSrcFilesExist;
+	int m_nFilesExistCount;
 
 private:
 	void Init_CRC32_Table();

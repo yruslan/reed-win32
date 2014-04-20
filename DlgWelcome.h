@@ -29,12 +29,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#define _OP_LOADRECOVERY	1
-#define _OP_CHECKFILES		2
-#define _OP_ADDDIR			3
-#define _OP_PROTECTFILE		4
-#define _OP_PROTECTDIR		5
-#define _OP_RECOVER			6
+#define _OP_LOADRECOVERY    1
+#define _OP_CHECKFILES      2
+#define _OP_ADDDIR          3
+#define _OP_PROTECTFILE     4
+#define _OP_PROTECTDIR      5
+#define _OP_RECOVER         6
+#define _OP_CHECKEXISTS     7
 
 // CDlgWelcome dialog
 
@@ -80,6 +81,7 @@ public:
 	static unsigned _stdcall trdLoadRecovery (LPVOID lpParameter);
 	static unsigned _stdcall trdAddDir (LPVOID lpParameter);
 	static unsigned _stdcall trdFilesAndDirs (LPVOID lpParameter);
+	static unsigned _stdcall trdCheckExists (LPVOID lpParameter);
 	static unsigned _stdcall trdCheckFiles (LPVOID lpParameter);
 	static unsigned _stdcall trdProtectFiles (LPVOID lpParameter);
 	static unsigned _stdcall trdProtectDir (LPVOID lpParameter);

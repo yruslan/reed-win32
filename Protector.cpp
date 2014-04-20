@@ -82,6 +82,8 @@ CProtector::CProtector()
 	fRest = NULL;
 	m_szRecoverPath = _T("");
 	m_bCreateSubdirs = true;
+	m_bAllSrcFilesExist = false;
+	m_nFilesExistCount = 0;
 	Init_CRC32_Table();
 }
 
@@ -698,12 +700,10 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 	pcnt = 0;
 	if (g_DlgProgress!=NULL)
 	{
-		g_DlgProgress->m_szOperation=_T("Checking file sizes");
+		g_DlgProgress->m_szOperation=_T("Loading the list of files");
 		g_DlgProgress->m_szFileName=szFileName;
 		g_DlgProgress->m_cProgress.SetRange(0,100);
 		g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
-		//g_DlgProgress->UpdateData(FALSE);
-		//g_DlgProgress->RedrawWindow();
 	}
 #endif
 
@@ -718,22 +718,14 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 		fread(&fi.size, sizeof(fi.size),1,f);
 		fread(&len, sizeof(len),1,f);
 		if (len<=0) return E_FORMAT_ERROR;
-		//fread(&fi.nCrc, sizeof(fi.nCrc),1,f);
 
 		fread(fi.szName, sizeof(TCHAR),len,f);
-
-//		fread(s2.GetBuffer(len+1), sizeof(TCHAR),len,f);
-//		s2.ReleaseBuffer(len);
-//		s3.Format(_T("%s%s"), szXPath, s2);
-//		_tcsncpy(fi.szName, s3, MAX_PATH_PROT);
-
-//		fread(&fi.st_ctime, sizeof(fi.st_ctime),1,f);
 		fread(&fi.st_mtime, sizeof(fi.st_mtime),1,f);
 
 		m_nTotalSize+=fi.size;
 		fi.status=6;
 
-		FILE *ft = _tfopen(fi.szName,_T("rb"));
+		/*FILE *ft = _tfopen(fi.szName,_T("rb"));
 		int k = errno;
 		if (ft==NULL)
 		{
@@ -752,7 +744,7 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 			}
 			else
 				fi.status=4;
-		}
+		}*/
 		m_arFiles.Add(fi);
 #ifdef _INSIDE_MFC_APP
 		if (pcnt % 100 == 0 && g_DlgProgress!=NULL)
@@ -765,9 +757,6 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 					percent = 0;
 			}
 			g_DlgProgress->m_cProgress.SetPos(percent);
-			//g_DlgProgress->Invalidate();
-			//g_DlgProgress->UpdateWindow();
-			//g_DlgProgress->RedrawWindow();
 		}
 		if (g_DlgProgress->m_bNeedTerminate)
 		{
@@ -785,6 +774,79 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 	m_szRecFileName = szFileName;
 	m_bReadOnly = true;
 
+	CheckFilesExists();
+
+	return 0;
+}
+
+int CProtector::CheckFilesExists()
+{
+	m_bAllSrcFilesExist = true;
+	m_nFilesExistCount = 0;
+#ifdef _INSIDE_MFC_APP
+	FILESIZE pcnt = 0;
+	if (g_DlgProgress!=NULL)
+	{
+		g_DlgProgress->m_szOperation=_T("Checking file sizes");
+		g_DlgProgress->m_szFileName = _T("...");
+		g_DlgProgress->m_cProgress.SetRange(0,100);
+		g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
+	}
+#endif
+
+	CString szPath = m_szPath;
+	if (szPath.GetLength()>1 && szPath.Right(1)!=_T("\\"))
+		szPath += _T("\\");
+	CString szFileName;
+
+	int i;
+	for (i=0; i<m_arFiles.GetSize(); i++)
+	{
+		t_FileInfo fi;
+		CString s2,s3;		
+
+		fi = m_arFiles[i];
+		fi.status=6;
+
+		szFileName = szPath + fi.szName;
+
+		if (_taccess(szFileName, 04))
+		{
+			fi.status=3;
+			m_bAllSrcFilesExist = false;
+		}
+		else
+		{
+			m_nFilesExistCount++;
+			FILESIZE file_size;
+			struct _stati64 statfile;
+			if( _tstati64( szFileName, &statfile ) == 0 )
+			{
+				file_size = statfile.st_size;
+				if( file_size!=fi.size)
+					fi.status=5;
+			}
+			else
+				fi.status=4;
+		}
+		m_arFiles.SetAt(i, fi);
+#ifdef _INSIDE_MFC_APP
+		if (pcnt % 100 == 0 && g_DlgProgress!=NULL)
+		{
+			int percent = 0;
+			percent = int(double(100*pcnt)/double(m_arFiles.GetSize()));
+			if (percent>100 || percent<0)
+				percent = 0;
+			g_DlgProgress->m_cProgress.SetPos(percent);
+		}
+		if (g_DlgProgress->m_bNeedTerminate)
+		{
+			Clear();
+			return E_PROTECTOR_TERMINATED;
+		}
+		pcnt++;
+#endif
+	}
 	return 0;
 }
 
@@ -909,6 +971,9 @@ int CProtector::Check2()
 		int rc = GetTmpFileName(m_szTempFile);
 		if (rc!=0)	return E_TMP_FILENAME; 
 	}
+	CString szPath = m_szPath;
+	if (szPath.GetLength()>1 && szPath.Right(1)!=_T("\\"))
+		szPath+=_T("\\");
 	
 	m_szRestSum = new char [nSegSize];
 	if (m_szRestSum==NULL)
@@ -945,11 +1010,13 @@ int CProtector::Check2()
 		//g_DlgProgress->RedrawWindow();
 	}
 #endif
+	CString szFileName;
 	for (int i=0; i<m_arFiles.GetSize(); i++)
 	{
 		t_FileInfo fi = m_arFiles.GetAt(i);
+		szFileName = szPath + fi.szName;
 
-		FILE *f = _tfopen (fi.szName, _T("rb"));
+		FILE *f = _tfopen (szFileName, _T("rb"));
 		if (f==NULL) 
 		{
 			fi.status=3;
@@ -959,7 +1026,7 @@ int CProtector::Check2()
 			fclose(f);
 			FILESIZE file_size;
 			struct _stati64 statfile;
-			if( _tstati64( fi.szName, &statfile ) == 0 )
+			if( _tstati64( szFileName, &statfile ) == 0 )
 				file_size = statfile.st_size;
 			else
 				return 100;
@@ -974,10 +1041,10 @@ int CProtector::Check2()
 		m_arFiles.SetAt(i, fi);
 
 		if (fi.checked==1)
-			fs.AddFile(fi.szName, fi.size);
+			fs.AddFile(szFileName, fi.size);
 		else
 		{
-			fs.AddFile(fi.szName, fi.size, 1);
+			fs.AddFile(szFileName, fi.size, 1);
 			bNotAll = true;
 		}
 
@@ -1398,26 +1465,33 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 		bUsePath=true;
 	}
 
+	CString szSrcPath = m_szPath;
+	if (szSrcPath.GetLength()>1 && szSrcPath.Right(1)!=_T("\\"))
+		szSrcPath+=_T("\\");
+
+	CString szSrcFileName;
 	for (i=0; i<m_arFiles.GetSize(); i++)
 	{
 		t_FileInfo fi = m_arFiles.GetAt(i);
 
+		szSrcFileName = szSrcPath + fi.szName;
+
 		if (bUsePath && fi.to_recover==1)
 		{
-			CString szFileName = szPath + fi.szName;
+			CString szTrgFileName = szPath + fi.szName;
 			//Checking File
 			FILESIZE file_size=0;
 			struct _stati64 statfile;
-			if( _tstati64( fi.szName, &statfile ) == 0 )
+			if( _tstati64( szSrcFileName, &statfile ) == 0 )
 			{
 				file_size = statfile.st_size;
 			}
 						
 			if (file_size>0)
 			{
-				fs.EnsurePathExist(szFileName);
+				fs.EnsurePathExist(szTrgFileName);
 				//Copying file...
-				int rc = CopyFile(fi.szName, szFileName, FALSE);
+				int rc = CopyFile(szSrcFileName, szTrgFileName, FALSE);
 				if (rc==0)
 				{
 					if (buf_rec!=NULL) delete [] buf_rec;
@@ -1428,10 +1502,10 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 				bUpdateNow=true;
 			}
 
-			fs.AddFile(szFileName, fi.size);
+			fs.AddFile(szTrgFileName, fi.size);
 		}
 		else
-			fs.AddFile(fi.szName, fi.size);
+			fs.AddFile(szSrcFileName, fi.size);
 
 #ifdef _INSIDE_MFC_APP
 		if ((pcnt % 100 == 0 || bUpdateNow) && g_DlgProgress!=NULL)
@@ -1977,7 +2051,17 @@ bool CProtector::isOrigPathCorrect()
 {
 	if (m_arFiles.GetSize()==0)
 		return false;
+
+	// If only several files protected, at least one should exist for original path to be correct
+	if (m_arFiles.GetSize()<10 && m_nFilesExistCount>0)
+		return true;
+
+	// If many files protected, some must exist (>20%) for original path to be correct
+	if (m_arFiles.GetSize()/5 < m_nFilesExistCount)
+		return true;
+	return false;
 	
+	/*
 	int cnt = m_arFiles.GetSize()<=10 ? m_arFiles.GetSize() : 10;
 	int i;
 	CString szPathName;
@@ -1986,6 +2070,6 @@ bool CProtector::isOrigPathCorrect()
 		szPathName.Format(_T("%s%s"), m_szPath, m_arFiles[i].szName);		
 		if (_taccess(szPathName, 0)!=0)
 			return false;
-	}
+	}*/
 	return true;
 }

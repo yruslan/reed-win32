@@ -123,11 +123,8 @@ BOOL CDlgCheckPath::OnInitDialog()
 		//	SetCurrentDirectory(szXPath);
 		//}
 		_tcscpy(g_Protector.m_szPath, szXPath);
-		if (g_Protector.isOrigPathCorrect())
-			m_szSrcPath = szXPath;
-		else
-			m_szSrcPath = _T("");
-		_tcscpy(g_Protector.m_szPath, szTmpPath);
+		m_szSrcPath = szXPath;
+		//_tcscpy(g_Protector.m_szPath, szTmpPath);
 	}
 
 	UpdateData(FALSE);
