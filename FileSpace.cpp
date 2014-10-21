@@ -329,8 +329,8 @@ int CFileSpace::SetBlock(FILESIZE nBlock, bool allow_writes=false)
 			file = _tfopen (szFileName,_T("rb+"));
 		if (file == NULL) 
 		{
-			//m_nCurrentFile = -1;
-			//return E_FILESPACE_CANNOT_OPEN;
+			m_nCurrentFile = -1;
+			return E_FILESPACE_CANNOT_OPEN;
 		}
 	}
 
