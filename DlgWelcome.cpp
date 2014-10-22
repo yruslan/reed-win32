@@ -372,11 +372,12 @@ void CDlgWelcome::OnBnClickedBtnProtectFiles()
 	while (p!=NULL)
 	{
 		s=dlg.GetNextPathName(p);
-		if (s.Right(4)==_T(".rcv"))
-		{
-			bHaveRcv = true;
-			continue;
-		}
+		// Allow to protect recovery files, why not?
+		//if (s.Right(4)==_T(".rcv"))
+		//{
+		//	bHaveRcv = true;
+		//	continue;
+		//}
 		int ret = g_Protector.AddFileInfo(s);
 		if (ret!=0)
 		{
@@ -728,7 +729,7 @@ void CDlgWelcome::OnComplete()
 			if (rc == E_CRC_ERROR)
 			{
 				CString msg;
-				msg.Format(_T("CRC Error! Bad Recovery File!"));
+				msg.Format(_T("Sorry, the recovery file itself is corrupted. Recovery info cannot be used to check and recover files."));
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
 			}
 			if (rc == E_FILE_NOT_OPENS)

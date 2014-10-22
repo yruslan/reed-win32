@@ -1183,7 +1183,7 @@ void CReedDlg::OnComplete()
 			if (rc == E_CRC_ERROR)
 			{
 				CString msg;
-				msg.Format(_T("CRC Error! Bad Recovery File!"));
+				msg.Format(_T("Sorry, the recovery file itself is corrupted. Recovery info cannot be used to check and recover files."));
 				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
 			}
 			if (rc == E_FILE_NOT_OPENS)
