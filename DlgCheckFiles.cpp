@@ -41,6 +41,7 @@ IMPLEMENT_DYNAMIC(CDlgCheckFiles, CDialog)
 
 CDlgCheckFiles::CDlgCheckFiles(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgCheckFiles::IDD, pParent)
+	, m_bShowOnlyErrors(FALSE)
 {
 
 }
@@ -53,12 +54,14 @@ void CDlgCheckFiles::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST_FILES, m_lstFiles);
+	DDX_Check(pDX, IDC_CHECK_SHOW_ERRORS, m_bShowOnlyErrors);
 }
 
 
 BEGIN_MESSAGE_MAP(CDlgCheckFiles, CDialog)
 	ON_BN_CLICKED(IDC_BTN_QUCK_CHECK, &CDlgCheckFiles::OnBnClickedBtnQuickCheck)
 	ON_BN_CLICKED(IDC_BTN_BACK, &CDlgCheckFiles::OnBnClickedBtnBack)
+	ON_BN_CLICKED(IDC_CHECK_SHOW_ERRORS, &CDlgCheckFiles::OnBnClickedCheckShowMissing)
 END_MESSAGE_MAP()
 
 
@@ -143,19 +146,30 @@ void CDlgCheckFiles::OnBnClickedBtnBack()
 	EndDialog(100);
 }
 
+void CDlgCheckFiles::OnBnClickedCheckShowMissing()
+{
+	UpdateData(TRUE);
+	UpdateList();
+}
+
 void CDlgCheckFiles::UpdateList()
 {
 	if ( m_lstFiles.GetItemCount() != 0)
 		m_lstFiles.DeleteAllItems();
 
 	int m_nCntFiles = g_Protector.m_arFiles.GetSize();
+	int nListCnt = 0;
 	for (int i=0; i<m_nCntFiles; i++)
 	{
 		CString st;
 		t_FileInfo fi = g_Protector.m_arFiles.GetAt(i);
 		st = fi.szName;
-		m_lstFiles.InsertItem(i, st);
-		m_lstFiles.SetItemText(i, 0, st);
+
+		if (m_bShowOnlyErrors && fi.status!=3 && fi.status!=4 && fi.status!=7)
+			continue;
+
+		m_lstFiles.InsertItem(nListCnt, st);
+		m_lstFiles.SetItemText(nListCnt, 0, st);
 
 		if (fi.size<1024*1)
 		{
@@ -173,7 +187,7 @@ void CDlgCheckFiles::UpdateList()
 			}
 
 		}
-		m_lstFiles.SetItemText(i, 1, st);
+		m_lstFiles.SetItemText(nListCnt, 1, st);
 
 		switch (fi.status)
 		{
@@ -205,7 +219,8 @@ void CDlgCheckFiles::UpdateList()
 			st=_T("?unknown?");
 			break;
 		}
-		m_lstFiles.SetItemText(i, 2, st);
+		m_lstFiles.SetItemText(nListCnt, 2, st);
+		nListCnt++;
 	}		
 	ListView_SetExtendedListViewStyle( m_lstFiles.m_hWnd, LVS_EX_FULLROWSELECT );
 }

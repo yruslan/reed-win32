@@ -44,6 +44,7 @@ public:
 	enum { IDD = IDD_DLG_CHECK_FILES };
 
 	CListCtrl	m_lstFiles;
+	BOOL m_bShowOnlyErrors;
 
 	void UpdateList();
 
@@ -55,4 +56,5 @@ protected:
 public:
 	afx_msg void OnBnClickedBtnQuickCheck();
 	afx_msg void OnBnClickedBtnBack();
+	afx_msg void OnBnClickedCheckShowMissing();
 };
