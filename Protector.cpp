@@ -401,6 +401,11 @@ int CProtector::CreateSolidRecovery2(FILESIZE size, LPCTSTR szFileName)
 
 					//g_DlgProgress->RedrawWindow();
 				}
+				if (g_DlgProgress->m_bNeedPause)
+				{
+					while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+						Sleep(1000);
+				}
 				if (g_DlgProgress->m_bNeedTerminate)
 				{
 					if (m_szRecovery!=NULL)	
@@ -626,6 +631,11 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 			//g_DlgProgress->UpdateWindow();
 			//g_DlgProgress->RedrawWindow();
 		}
+		if (g_DlgProgress->m_bNeedPause)
+		{
+			while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+				Sleep(1000);
+		}
 		if (g_DlgProgress->m_bNeedTerminate)
 		{
 			if (buf1!=NULL)
@@ -758,6 +768,11 @@ int CProtector::LoadRecovery2(LPCTSTR szFileName)
 			}
 			g_DlgProgress->m_cProgress.SetPos(percent);
 		}
+		if (g_DlgProgress->m_bNeedPause)
+		{
+			while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+				Sleep(1000);
+		}
 		if (g_DlgProgress->m_bNeedTerminate)
 		{
 			fclose(f);
@@ -838,6 +853,11 @@ int CProtector::CheckFilesExists()
 			if (percent>100 || percent<0)
 				percent = 0;
 			g_DlgProgress->m_cProgress.SetPos(percent);
+		}
+		if (g_DlgProgress->m_bNeedPause)
+		{
+			while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+				Sleep(1000);
 		}
 		if (g_DlgProgress->m_bNeedTerminate)
 		{
@@ -1062,6 +1082,11 @@ int CProtector::Check2()
 			g_DlgProgress->m_cProgress.SetPos(percent);
 			//g_DlgProgress->RedrawWindow();
 		}
+		if (g_DlgProgress->m_bNeedPause)
+		{
+			while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+				Sleep(1000);
+		}
 		if (g_DlgProgress->m_bNeedTerminate)
 		{
 			if (fRest!=NULL)
@@ -1225,6 +1250,11 @@ int CProtector::Check2()
 					g_DlgProgress->m_cProgress.SetPos(percent);
 					//g_DlgProgress->Invalidate();
 					//g_DlgProgress->UpdateWindow();
+				}
+				if (g_DlgProgress->m_bNeedPause)
+				{
+					while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+						Sleep(1000);
 				}
 				if (g_DlgProgress->m_bNeedTerminate)
 				{
@@ -1540,6 +1570,11 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 			g_DlgProgress->m_cProgress.SetPos(percent);
 			//g_DlgProgress->RedrawWindow();
 		}
+		if (g_DlgProgress->m_bNeedPause)
+		{
+			while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+				Sleep(1000);
+		}
 		if (g_DlgProgress->m_bNeedTerminate)
 		{
 			if (buf_rec!=NULL)
@@ -1645,6 +1680,11 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 			g_DlgProgress->m_szFileName=szLastFile;
 			g_DlgProgress->m_cProgress.SetPos(percent);
 			g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
+		}
+		if (g_DlgProgress->m_bNeedPause)
+		{
+			while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+				Sleep(1000);
 		}
 		if (g_DlgProgress->m_bNeedTerminate)
 		{
@@ -2045,6 +2085,11 @@ int CProtector::AddDir(LPCTSTR szPath)
 				g_DlgProgress->m_szFileName=szCurrentFolder;
 				g_DlgProgress->m_cProgress.SetPos(percent);
 				g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
+			}
+			if (g_DlgProgress->m_bNeedPause)
+			{
+				while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+					Sleep(1000);
 			}
 			if (g_DlgProgress->m_bNeedTerminate)
 			{

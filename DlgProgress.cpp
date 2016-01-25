@@ -40,6 +40,8 @@ CDlgProgress::CDlgProgress(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgProgress::IDD, pParent)
 	, m_szOperation(_T(""))
 	, m_szFileName(_T(""))
+	, m_bNeedPause(false)
+	, m_bNeedTerminate(false)
 {
 
 }
@@ -59,6 +61,7 @@ void CDlgProgress::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlgProgress, CDialog)
 	ON_BN_CLICKED(IDC_BTN_CANCEL, &CDlgProgress::OnBnClickedBtnCancel)
+	ON_BN_CLICKED(IDC_BTN_PAUSE, &CDlgProgress::OnBnClickedBtnPause)
 	ON_COMMAND(IDC_CUSTOM_UPDATE, &CDlgProgress::OnUpdateNow)
 	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
@@ -69,6 +72,22 @@ END_MESSAGE_MAP()
 void CDlgProgress::OnBnClickedBtnCancel()
 {
 	m_bNeedTerminate = true;
+	m_bNeedPause = false;
+	GetDlgItem(IDC_BTN_PAUSE)->SetWindowText(_T("Pause"));
+}
+
+void CDlgProgress::OnBnClickedBtnPause()
+{
+	if (m_bNeedPause)
+	{
+		GetDlgItem(IDC_BTN_PAUSE)->SetWindowText(_T("Pause"));
+		m_bNeedPause = false;
+	}
+	else
+	{
+		GetDlgItem(IDC_BTN_PAUSE)->SetWindowText(_T("Resume"));
+		m_bNeedPause = true;
+	}	
 }
 
 void CDlgProgress::OnUpdateNow()
@@ -98,7 +117,10 @@ BOOL CDlgProgress::OnInitDialog()
 
 BOOL CDlgProgress::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-	::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_APPSTARTING));	
+	if (m_bNeedPause)
+		::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
+	else
+		::SetCursor(AfxGetApp()->LoadStandardCursor(IDC_APPSTARTING));
 	return TRUE;
 	//return CDialog::OnSetCursor(pWnd, nHitTest, message);
 }

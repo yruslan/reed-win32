@@ -41,6 +41,7 @@
 #define IDC_EDIT_RECOVER_PATH           1018
 #define IDC_BTN_RECOVER_THIS            1019
 #define IDC_EDIT_RECOVER_PATH2          1019
+#define IDC_BTN_PAUSE                   1019
 #define IDC_BTN_CHECK_THIS              1020
 #define IDC_RADIO1                      1021
 #define IDC_RADIO2                      1022
@@ -48,7 +49,7 @@
 #define IDC_CHECK1                      1023
 #define IDC_CHK_QUADRO                  1023
 #define IDC_CHK_INPLACE                 1023
-#define IDC_CHECK_SHOW_ERRORS          1023
+#define IDC_CHECK_SHOW_ERRORS           1023
 #define IDC_RADIO3                      1024
 #define IDC_CHK_SUBDIRS                 1024
 #define IDC_RADIO4                      1025

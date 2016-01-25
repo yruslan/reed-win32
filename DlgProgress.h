@@ -55,11 +55,13 @@ public:
 	CString m_szOperation;
 	CString m_szFileName;
 	bool m_bNeedTerminate;
+	bool m_bNeedPause;
 
 	CFont m_fntBold;
 	CFont m_fntBoldSmall;
 
 	afx_msg void OnBnClickedBtnCancel();
+	afx_msg void OnBnClickedBtnPause();
 	afx_msg void OnUpdateNow();
 
 	CProgressCtrl m_cProgress;
