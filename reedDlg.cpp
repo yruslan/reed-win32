@@ -1169,6 +1169,13 @@ void CReedDlg::OnComplete()
 		MessageBox(_T("Process was interrupted!"),_T("Info"), MB_ICONEXCLAMATION);
 		return;
 	}
+	if (rc == E_NOT_ENOUGH_SPACE)
+	{
+		InvalidateControls();
+		UpdateList();
+		MessageBox(_T("Not enough space on disk drive!"),_T("Info"), MB_ICONEXCLAMATION);
+		return;
+	}
 	if (rc == E_UNEXPECTED)
 	{
 		CString msg;

@@ -881,6 +881,15 @@ void CDlgWelcome::OnComplete()
 			if (rc==E_PROTECTOR_TERMINATED)
 				return;
 
+			if (rc == E_NOT_ENOUGH_SPACE)
+			{
+				CString szMsg;
+				szMsg.Format(_T("Not enough space on disk drive (while writing %s)!"),
+					(LPCTSTR)g_Protector.GetLastTempFileName());
+				MessageBox(szMsg,_T("Info"), MB_ICONEXCLAMATION);
+				return;
+			}
+
 			//Select files to recover
 			//and recover path
 			CDlgRecover dlg;
@@ -911,9 +920,7 @@ void CDlgWelcome::OnComplete()
 				//Recover
 				//...
 				int rc = RunAsync(trdRecoverFiles);
-
 			}
-
 		}
 		return;
 	}

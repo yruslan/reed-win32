@@ -127,6 +127,7 @@ public:
 	bool m_bAllSrcFilesExist;
 	int m_nFilesExistCount;
 
+	CString GetLastTempFileName()	{ return m_szTempFile; };
 private:
 	void Init_CRC32_Table();
 	UINT Reflect(UINT ref, char ch);

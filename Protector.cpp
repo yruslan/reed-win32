@@ -1252,7 +1252,25 @@ int CProtector::Check2()
 		}
 
 		if (!bNotAll)
-			fwrite(m_szRestSum, 1, cur_seg_size, fRest);
+		{
+			size_t nActualSize = fwrite(m_szRestSum, 1, cur_seg_size, fRest);
+			if (nActualSize!=cur_seg_size)
+			{
+				if (fRest!=NULL)
+				{
+					fclose(fRest);
+					fRest = NULL;
+					_tunlink(m_szTempFile);
+				}
+				if (buf!=NULL)
+					delete [] buf;
+
+				if (m_szRestSum!=NULL)
+					delete [] m_szRestSum;
+				m_szRestSum = NULL;
+				return E_NOT_ENOUGH_SPACE;
+			}
+		}
 		
 		/*if (data_written+nSegSize<=m_nRecoverySize)
 		{
@@ -1556,25 +1574,31 @@ int CProtector::Recover2(int spec_file /*= -1*/)
 			int nFile=0;
 			FILESIZE nPos=0;
 			int fok = fs.GetFileNumberAndPos(blockA*m_nRecoveryBlockSize, nFile, nPos);
-			if (fok!=0) continue;
+			if (fok!=0)
+				continue;
 
 			t_FileInfo fi = m_arFiles.GetAt(nFile);
-			if (fi.to_recover==0 || fi.checked!=2) continue;
+			if (fi.to_recover==0 || fi.checked!=2)
+				continue;
 
 			//Get recover data
 			FILESIZE ipos = (FILESIZE) HEADER_SIZE + 
 				((FILESIZE)i)*((FILESIZE)m_nRecoveryBlockSize);
 			int rc = _fseeki64 (fRec, ipos, SEEK_SET);
-			if (rc!=0) continue;
+			if (rc!=0)
+				continue;
 			int size = fread(buf_rec, 1, m_nRecoveryBlockSize, fRec);
-			if (size<m_nRecoveryBlockSize)	continue;
+			if (size<m_nRecoveryBlockSize)
+				continue;
 
 			//Get sum data
 			ipos = ((FILESIZE)i)*((FILESIZE)m_nRecoveryBlockSize);
 			rc = _fseeki64 (fRest, ipos, SEEK_SET);
-			if (rc!=0) continue;
+			if (rc!=0)
+				continue;
 			size = fread(buf_sum, 1, m_nRecoveryBlockSize, fRest);
-			if (size<m_nRecoveryBlockSize) 	continue;
+			if (size<m_nRecoveryBlockSize)
+				continue;
 
 			//Get file data
 			memset(buf_file,0,m_nRecoveryBlockSize);
