@@ -2054,6 +2054,10 @@ int CProtector::AddDir(LPCTSTR szPath)
 						if (szMask.Right(4)==".rcv")
 							isRecovery=true;
 					}
+					if (szMask == _T("Thumbs.db"))
+					{
+						isRecovery=true;
+					}
 					if (!isRecovery)
 					{
 						szMask = szCurrentFolder + fd.cFileName;
