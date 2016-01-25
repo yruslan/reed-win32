@@ -1036,14 +1036,13 @@ int CProtector::Check2()
 		t_FileInfo fi = m_arFiles.GetAt(i);
 		szFileName = szPath + fi.szName;
 
-		FILE *f = _tfopen (szFileName, _T("rb"));
-		if (f==NULL) 
+		int nOK = _taccess (szFileName, 04);
+		if (nOK != 0) 
 		{
 			fi.status=3;
 		}
 		else
 		{
-			fclose(f);
 			FILESIZE file_size;
 			struct _stati64 statfile;
 			if( _tstati64( szFileName, &statfile ) == 0 )

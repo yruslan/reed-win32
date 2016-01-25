@@ -83,10 +83,6 @@ int CFileSpace::AddFile(LPCTSTR szFileName, FILESIZE use_size /*= 0*/, int ignor
 //	else
 //		return E_FILESPACE_NOTFOUND;
 
-	FILE *f = NULL;
-	f = _tfopen(szFileName,_T("rb"));
-	if (f != NULL)
-		fclose(f);
 //		return E_FILESPACE_CANNOT_OPEN;
 	//fclose(f);
 
