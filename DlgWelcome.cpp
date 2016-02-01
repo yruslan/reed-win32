@@ -361,6 +361,11 @@ void CDlgWelcome::OnBnClickedBtnProtectFiles()
 	//Select files to protect
 	CFileDialog dlg(TRUE, _T("All"), _T("*.*"), OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT, _T("All Files(*.*)|*.*||") );
 
+	CString szBuf;
+
+	dlg.m_ofn.lpstrFile = szBuf.GetBuffer(10*1024*1024);
+	dlg.m_ofn.nMaxFile = 10*1024*1024;
+
 	int ret = dlg.DoModal();
 
 	if (ret!=IDOK) return;
@@ -387,6 +392,7 @@ void CDlgWelcome::OnBnClickedBtnProtectFiles()
 			return;
 		}
 	}
+	szBuf.ReleaseBuffer(1);
 
 	if (g_Protector.m_arFiles.GetSize()==0)
 	{
