@@ -108,6 +108,8 @@ public:
 	int GetTmpFileName(CString &szFileName);
 	bool isOrigPathCorrect();
 
+	FILESIZE SetRecoverySize(FILESIZE nWantSize); // Sets Recovery size, will recurn actual size
+
 	UINT CProtector::Get_CRC(void *_szData, int nLength, UINT nCRC/*=0*/);
 
 	CArray<t_FileInfo,t_FileInfo&> m_arFiles;
@@ -121,6 +123,7 @@ public:
 
 	bool m_bReadOnly;
 	bool m_bCreateSubdirs;
+	bool m_bCreateRecForRec;        // Create recovery file for recovery file
 	CString m_szRecoverPath;
 	CString m_szRecFileName;
 

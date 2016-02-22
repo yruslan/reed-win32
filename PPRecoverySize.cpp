@@ -42,6 +42,7 @@ CPPRecoverySize::CPPRecoverySize()
 	, m_szRecFile(_T(""))
 	, m_nRecSizeMB(100)
 	, m_nSliderPercent(0)
+	, m_bRecForRec(FALSE)
 {
 	m_szFolder = _T("");
 	m_szFiles = _T("");
@@ -63,6 +64,7 @@ void CPPRecoverySize::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_STATIC_SIZE, m_szSize);
 	DDX_Text(pDX, IDC_EDIT_RECOVER_PATH2, m_szRecFile);
 	DDX_Text(pDX, IDC_EDIT_REC_SIZE, m_nRecSizeMB);
+	DDX_Check(pDX, IDC_CHECK_REC_FOR_REC, m_bRecForRec);
 	DDX_Slider(pDX, IDC_SLIDER_PERCENT, m_nSliderPercent);
 	DDX_Control(pDX, IDC_SLIDER_PERCENT, m_cSliderPercent);
 }
@@ -157,6 +159,7 @@ BOOL CPPRecoverySize::OnSetActive()
 	}
 	else
 		NumbersToBytes((int)g_Protector.m_nTotalSize, 1, m_szSize);
+	m_bRecForRec = g_Protector.m_bCreateRecForRec ? TRUE : FALSE; // bool -> BOOL
 	
 	UpdateData(FALSE);
 

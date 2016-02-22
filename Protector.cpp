@@ -77,6 +77,7 @@ CProtector::CProtector()
 	m_nCntRecoverable = 0;
 	m_nCntNotRecoverable = 0;
 	m_bReadOnly = false;
+	m_bCreateRecForRec = false;
 	m_nTotalSize = 0;
 	m_szRecFileName = _T("");
 	fRest = NULL;
@@ -2144,4 +2145,29 @@ bool CProtector::isOrigPathCorrect()
 			return false;
 	}*/
 	return true;
+}
+
+FILESIZE CProtector::SetRecoverySize(FILESIZE nWantSize)
+{
+	FILESIZE nSizeInMB = nWantSize/(1014*1024);
+	if (nSizeInMB<1)
+	{
+		g_Protector.m_nRecoveryBlockSize = 512;
+	}
+	else
+	{
+		int block_size=1;
+		if (nSizeInMB>10) block_size=4;
+		if (nSizeInMB>50) block_size=8;
+		if (nSizeInMB>100) block_size=16;
+		if (nSizeInMB>500) block_size=32;
+		if (nSizeInMB>1000) block_size=64;
+		if (nSizeInMB>2000) block_size=128;
+		g_Protector.m_nRecoveryBlockSize = block_size*1024;
+	}
+
+	FILESIZE block_size_bt = g_Protector.m_nRecoveryBlockSize;
+	if (nWantSize % block_size_bt > 0)
+		nWantSize = ((nWantSize / block_size_bt)+1)*block_size_bt;
+	return nWantSize;
 }

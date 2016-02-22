@@ -668,16 +668,7 @@ void CDlgWelcome::OnComplete()
 
 		rec_size = p1.m_nRecSizeMB;			
 
-		int block_size=4;
-		if (rec_size<1) rec_size = 1;
-		if (rec_size>10) block_size=4;
-		if (rec_size>50) block_size=8;
-		if (rec_size>100) block_size=16;
-		if (rec_size>500) block_size=32;
-		if (rec_size>1000) block_size=64;
-		if (rec_size>2000) block_size=128;
-
-		g_Protector.m_nRecoveryBlockSize = block_size*1024;
+		g_Protector.m_bCreateRecForRec = p1.m_bRecForRec ? true : false; // BOOL -> bool
 
 		if (p1.m_bSizeInMB)
 		{
@@ -688,6 +679,8 @@ void CDlgWelcome::OnComplete()
 			g_Protector.m_nRecoveryBlockSize = 512;
 			m_nArgSize = ((FILESIZE)rec_size)*1024;
 		}
+		m_nArgSize = g_Protector.SetRecoverySize(m_nArgSize);
+
 		m_szArgFileName = p1.m_szRecFile;
 		int rc = RunAsync(trdProtectDir);
 	}
@@ -718,6 +711,32 @@ void CDlgWelcome::OnComplete()
 			if (m_bStartedFromCommandLine)
 				AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
 			return;
+		}
+
+		// Create recover info file for recovery info file
+		if (g_Protector.m_bCreateRecForRec)
+		{
+			g_Protector.Clear();
+			g_Protector.m_bCreateRecForRec = false;
+			int ret = g_Protector.AddFileInfo(m_szArgFileName);
+			if (ret!=0)
+			{
+				CString msg;
+				msg.Format(_T("Unable to read file '%s'!"), m_szArgFileName);
+				MessageBox(msg,_T("Error"), MB_ICONEXCLAMATION);
+				g_Protector.Clear();
+				if (m_bStartedFromCommandLine)
+					AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
+			}
+			FILESIZE rec_size = (FILESIZE) (double(g_Protector.m_nTotalSize) * 0.1);
+			if (rec_size>1024*1024)
+			{
+				rec_size = g_Protector.SetRecoverySize(rec_size);
+				m_nArgSize = rec_size;
+				m_szArgFileName += ".rcv";
+				int rc = RunAsync(trdProtectDir);
+				return;
+			}
 		}
 
 		CString msg;

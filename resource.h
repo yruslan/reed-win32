@@ -50,6 +50,7 @@
 #define IDC_CHK_QUADRO                  1023
 #define IDC_CHK_INPLACE                 1023
 #define IDC_CHECK_SHOW_ERRORS           1023
+#define IDC_CHECK_REC_FOR_REC           1023
 #define IDC_RADIO3                      1024
 #define IDC_CHK_SUBDIRS                 1024
 #define IDC_RADIO4                      1025

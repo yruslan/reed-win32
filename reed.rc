@@ -95,7 +95,7 @@ BEGIN
     LTEXT           "Data protection and recovery utility for unreliable storage media",IDC_STATIC,45,11,143,18,SS_NOPREFIX
     LTEXT           "(C) Ruslan Yushchenko, 2009-2016",IDC_STATIC,45,33,119,8
     DEFPUSHBUTTON   "OK",IDOK,208,7,50,14,WS_GROUP
-    LTEXT           "Version 2.0.4, distributed via New BSD license",IDC_STATIC,45,48,147,8
+    LTEXT           "Version 2.0.5, distributed via New BSD license",IDC_STATIC,45,48,147,8
 END
 
 IDD_REED_DIALOG DIALOGEX 0, 0, 487, 274
@@ -196,6 +196,8 @@ BEGIN
     EDITTEXT        IDC_EDIT_REC_SIZE,213,88,42,13,ES_AUTOHSCROLL
     LTEXT           "MB",IDC_STATIC_MB,258,90,20,8
     CTEXT           "%",IDC_STATIC_PERCENT,103,108,51,8
+    CONTROL         "Add recovery file for recovery file",IDC_CHECK_REC_FOR_REC,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,112,125,10
     GROUPBOX        " Save recovery info ",IDC_STATIC,7,128,283,48
     LTEXT           "Recovery info file will be placed to",IDC_STATIC,20,142,119,9
     EDITTEXT        IDC_EDIT_RECOVER_PATH2,20,153,234,13,ES_AUTOHSCROLL
@@ -274,8 +276,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,4,0
- PRODUCTVERSION 2,0,4,0
+ FILEVERSION 2,0,5,0
+ PRODUCTVERSION 2,0,5,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -292,12 +294,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Ruslan Yushchenko"
             VALUE "FileDescription", "Protect files to be stored on unreliable media"
-            VALUE "FileVersion", "2, 0, 4, 0"
+            VALUE "FileVersion", "2, 0, 5, 0"
             VALUE "InternalName", "reed"
-            VALUE "LegalCopyright", "2009-2014 (C) Ruslan Yushchenko"
+            VALUE "LegalCopyright", "2009-2016 (C) Ruslan Yushchenko"
             VALUE "OriginalFilename", "reed.exe"
             VALUE "ProductName", "DVD Protect&Recover"
-            VALUE "ProductVersion", "2, 0, 4, 0"
+            VALUE "ProductVersion", "2, 0, 5, 0"
         END
     END
     BLOCK "VarFileInfo"
