@@ -212,12 +212,9 @@ int CProtector::AddFileInfo(LPCTSTR szFileName)
 			return E_ZERO_SIZED_FILE;
 	}
 	
-	FILE *f = NULL;
-	f = _tfopen(szFileName,_T("rb"));
-	if (f == NULL)
+	int nAccess = _taccess(szFileName, 04);
+	if (nAccess != 0)
 		return E_FILE_NOT_OPENS;
-
-	fclose(f);
 
 	struct t_FileInfo fi;
 //	fi.st_ctime = statfile.st_ctime;
@@ -2145,6 +2142,11 @@ bool CProtector::isOrigPathCorrect()
 			return false;
 	}*/
 	return true;
+}
+
+FILESIZE CProtector::GetTotalSizeInMB()
+{
+	return m_nTotalSize / (1024*1024);
 }
 
 FILESIZE CProtector::SetRecoverySize(FILESIZE nWantSize)

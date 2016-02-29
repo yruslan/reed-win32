@@ -106,6 +106,8 @@ BOOL CPPRecoverySize::OnInitDialog()
 		m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024*1024));
 	else
 		m_nRecSizeMB = int(double(g_Protector.m_nTotalSize)*(10.5)*0.01/double(1024));
+	if (g_Protector.GetTotalSizeInMB()>4096)
+		g_Protector.m_bCreateRecForRec = true;
 	m_szFolder = g_Protector.m_szPath;
 	if (m_szFolder!=_T(""))
 	{

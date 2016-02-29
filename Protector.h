@@ -108,6 +108,8 @@ public:
 	int GetTmpFileName(CString &szFileName);
 	bool isOrigPathCorrect();
 
+	FILESIZE GetTotalSizeInMB();
+
 	FILESIZE SetRecoverySize(FILESIZE nWantSize); // Sets Recovery size, will recurn actual size
 
 	UINT CProtector::Get_CRC(void *_szData, int nLength, UINT nCRC/*=0*/);
