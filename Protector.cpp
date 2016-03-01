@@ -1994,6 +1994,88 @@ int CProtector::CheckFile(t_FileInfo &fi)
 	return 0;
 }
 
+int CProtector::GetNumOfFilesInDir(LPCTSTR szPath)
+{
+	int nFilesCount = 0;
+	CStringArray szDirList;
+	CString szFolder = szPath;
+
+	if (szFolder=="") return 0;
+	if (szFolder.Right(1)!='\\')
+		szFolder+="\\";
+
+	szDirList.Add(szFolder);
+
+	//Recursive directory
+	CString szCurrentFolder;
+	CString szMask;
+	while (szDirList.GetSize()>0)
+	{
+		int cd = szDirList.GetSize()-1;
+		szCurrentFolder = szDirList.GetAt(cd);
+		szDirList.RemoveAt(cd);
+
+		if (szCurrentFolder.Right(1)!='\\')
+			szCurrentFolder+=_T("\\");
+
+		szMask.Format(_T("%s*.*"), szCurrentFolder);
+
+		WIN32_FIND_DATA fd;
+		HANDLE  hFind = FindFirstFile(szMask, &fd);
+		if( hFind != INVALID_HANDLE_VALUE)
+		{
+			do
+			{
+				szMask = fd.cFileName;				
+				if (szMask!="." && szMask!=".." && szMask!="Directory.rcv")
+				{
+					bool isRecovery = false;
+					if (szMask.GetLength()>4)
+					{
+						if (szMask.Right(4)==".rcv")
+							isRecovery=true;
+					}
+					if (szMask == _T("Thumbs.db"))
+					{
+						isRecovery=true;
+					}
+					if (!isRecovery)
+					{
+						szMask = szCurrentFolder + fd.cFileName;
+
+						if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) > 0)
+						{
+							szDirList.Add(szMask);
+						}
+						else
+						{
+							nFilesCount++;
+						}
+					}
+				}
+			}	while(FindNextFile(hFind, &fd));
+			FindClose(hFind);
+
+#ifdef _INSIDE_MFC_APP
+			if (g_DlgProgress!=NULL)
+			{
+				if (g_DlgProgress->m_bNeedPause)
+				{
+					while (g_DlgProgress->m_bNeedPause && !g_DlgProgress->m_bNeedTerminate)
+						Sleep(1000);
+				}
+				if (g_DlgProgress->m_bNeedTerminate)
+				{
+					Clear();
+					return E_PROTECTOR_TERMINATED;
+				}
+			}
+#endif
+		}
+	}
+	return nFilesCount;
+}
+
 int CProtector::AddDir(LPCTSTR szPath)
 {
 	CString szFolder = szPath;
@@ -2018,9 +2100,24 @@ int CProtector::AddDir(LPCTSTR szPath)
 		g_DlgProgress->m_szOperation=_T("Loading list of files");
 		g_DlgProgress->m_szFileName=szPath;
 		g_DlgProgress->m_cProgress.SetRange(0,100);
+		g_DlgProgress->m_cProgress.SetPos(0);
 		g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
-		//g_DlgProgress->UpdateData(FALSE);
-		//g_DlgProgress->RedrawWindow();
+	}
+#endif
+
+	int nFilesCount = GetNumOfFilesInDir(szPath);
+
+#ifdef _INSIDE_MFC_APP
+	if (g_DlgProgress->m_bNeedTerminate)
+	{
+		Clear();
+		return E_PROTECTOR_TERMINATED;
+	}
+	if (g_DlgProgress!=NULL)
+	{
+		g_DlgProgress->m_szOperation=_T("Checking file sizes and permissions");
+		g_DlgProgress->m_cProgress.SetPos(10);
+		g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
 	}
 #endif
 
@@ -2067,6 +2164,7 @@ int CProtector::AddDir(LPCTSTR szPath)
 						else
 						{						
 							AddFileInfo(szMask);
+							pcnt++;
 						}
 					}
 				}
@@ -2075,14 +2173,11 @@ int CProtector::AddDir(LPCTSTR szPath)
 #ifdef _INSIDE_MFC_APP
 			if (g_DlgProgress!=NULL)
 			{
-				int percent = 0;
-				FILESIZE cnt = szDirList.GetSize()+pcnt;
-				if (cnt>0)
-				{
-					percent = int(double(100*pcnt)/double(cnt+1));
-					if (percent>100 || percent<0)
-						percent = 0;
-				}
+				int percent = 10 + int(double(90*pcnt)/double(nFilesCount));
+				if (percent>100)
+					percent = 100;
+				if (percent<10)
+					percent = 10;
 				g_DlgProgress->m_szFileName=szCurrentFolder;
 				g_DlgProgress->m_cProgress.SetPos(percent);
 				g_DlgProgress->PostMessageW(WM_COMMAND, IDC_CUSTOM_UPDATE);
@@ -2097,7 +2192,6 @@ int CProtector::AddDir(LPCTSTR szPath)
 				Clear();
 				return E_PROTECTOR_TERMINATED;
 			}
-			pcnt++;
 #endif
 		}
 	}

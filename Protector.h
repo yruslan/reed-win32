@@ -103,6 +103,7 @@ public:
 	
 	void Clear();
 	int AddFileInfo(LPCTSTR szFileName);
+	int GetNumOfFilesInDir(LPCTSTR szPath);
 	int AddDir(LPCTSTR szPath);
 	bool isAllChecked();
 	int GetTmpFileName(CString &szFileName);
