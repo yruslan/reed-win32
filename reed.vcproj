@@ -267,6 +267,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\mfc_helpers.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PPRecoverySize.cpp"
 				>
 			</File>
@@ -411,6 +415,10 @@
 			</File>
 			<File
 				RelativePath=".\FileSpace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mfc_helpers.h"
 				>
 			</File>
 			<File
