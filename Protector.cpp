@@ -2238,6 +2238,30 @@ bool CProtector::isOrigPathCorrect()
 	return true;
 }
 
+bool CProtector::isSpecificPathCorrect(const CString &szSourcePath)
+{
+	CString szPath = szSourcePath;
+	if (szPath.GetLength() > 1 && szPath.Right(1) != _T("\\"))
+		szPath += _T("\\");
+	CString szFileName;
+
+	int i;
+	for (i = 0; i < m_arFiles.GetSize(); i++)
+	{
+		t_FileInfo fi;
+		CString s2, s3;
+
+		fi = m_arFiles[i];
+		fi.status = 6;
+
+		szFileName = szPath + fi.szName;
+
+		if (!_taccess(szFileName, 04))
+			return true;
+	}
+	return false;	
+}
+
 FILESIZE CProtector::GetTotalSizeInMB()
 {
 	return m_nTotalSize / (1024*1024);

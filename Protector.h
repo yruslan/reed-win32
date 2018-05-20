@@ -108,6 +108,7 @@ public:
 	bool isAllChecked();
 	int GetTmpFileName(CString &szFileName);
 	bool isOrigPathCorrect();
+	bool isSpecificPathCorrect(const CString &szSourcePath);
 
 	FILESIZE GetTotalSizeInMB();
 

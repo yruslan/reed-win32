@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include "reed.h"
 #include "utils.h"
+#include "mfc_helpers.h"
 #include "DlgCheckPath.h"
 #include "DlgListFiles.h"
 
@@ -104,7 +105,20 @@ BOOL CDlgCheckPath::OnInitDialog()
 
 	m_szOrigCount.Format(_T("%d"), g_Protector.m_arFiles.GetSize());
 
-	if (g_Protector.isOrigPathCorrect())
+
+	CString szTmpPath = g_Protector.m_szPath;
+	CString szRcvPath = g_Protector.m_szRecFileName;
+
+	int pos = szRcvPath.ReverseFind('\\');
+	CString szXPath = _T(".\\");
+	if (pos > 0)
+		szXPath = szRcvPath.Left(pos + 1);
+
+/*	if (g_Protector.isSpecificPathCorrect(szXPath))
+	{
+		_tcscpy(g_Protector.m_szPath, szXPath);
+		m_szSrcPath = szXPath;
+	} else if (g_Protector.isOrigPathCorrect())
 	{
 		GetDlgItem(IDC_EDIT_SRC_PATH)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_BTN_SRC_PATH)->ShowWindow(SW_HIDE);
@@ -112,20 +126,12 @@ BOOL CDlgCheckPath::OnInitDialog()
 	}
 	else
 	{
-		CString szTmpPath = g_Protector.m_szPath;
-		CString szRcvPath = g_Protector.m_szRecFileName;
-
-		int pos = szRcvPath.ReverseFind('\\');
-		CString szXPath=_T(".\\");
-		if (pos>0)
-			szXPath = szRcvPath.Left(pos+1);
-		//{
-		//	SetCurrentDirectory(szXPath);
-		//}
 		_tcscpy(g_Protector.m_szPath, szXPath);
 		m_szSrcPath = szXPath;
-		//_tcscpy(g_Protector.m_szPath, szTmpPath);
-	}
+	}*/
+
+	_tcscpy(g_Protector.m_szPath, szXPath);
+	m_szSrcPath = szXPath;
 
 	UpdateData(FALSE);
 
@@ -141,32 +147,12 @@ void CDlgCheckPath::OnBnClickedBtnList()
 void CDlgCheckPath::OnBnClickedBtnSrcPath()
 {
 	//Select a folder
-	UpdateData(TRUE);
-	BROWSEINFO info;
-	info.hwndOwner = AfxGetApp()->GetMainWnd()->GetSafeHwnd();
-	info.pidlRoot = NULL;
-	_TCHAR szBuf[_MAX_PATH];
-	info.pszDisplayName = szBuf;
-	info.lpszTitle = _T("Protected Data Path");
-	info.ulFlags = 0;
-	info.lpfn = NULL;
-	info.lParam = NULL;
-	info.iImage = 0;
-	LPITEMIDLIST lpH = SHBrowseForFolder(&info);
-	if(!lpH) return;
-	CString szFolder;
-	if(SHGetPathFromIDList(lpH,szBuf)) 
+	CString szPath;
+	if (IDOK == MFC_FolderDialog(szPath,
+		AfxGetApp()->GetMainWnd()->GetSafeHwnd(),
+		_T("Protected Data Path"), m_szSrcPath, false)) 
 	{
-		szFolder = szBuf;
+		m_szSrcPath = szPath;
+		UpdateData(FALSE);
 	}
-	IMalloc *pMalloc = NULL;
-	if(SUCCEEDED(SHGetMalloc(&pMalloc))&&pMalloc)
-	{
-		pMalloc->Free(lpH); pMalloc->Release();
-	}
-
-	if (szFolder==_T("")) return;
-
-	m_szSrcPath = szFolder;
-	UpdateData(FALSE);
 }
