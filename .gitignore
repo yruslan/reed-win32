@@ -1,0 +1,15 @@
+*.ncb
+*.plg
+*.suo
+*.sdf
+*.opensdf
+*.clw
+*.opt
+*.aps
+*.tmp
+*.orig
+*.user
+Debug/*
+ipch/*
+Release/*
+UpgradeLog.htm

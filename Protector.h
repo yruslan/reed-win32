@@ -107,6 +107,7 @@ public:
 	int AddDir(LPCTSTR szPath);
 	bool isAllChecked();
 	int GetTmpFileName(CString &szFileName);
+	CString GetFileName(const CString &szFullPathName);
 	bool isOrigPathCorrect();
 	bool isSpecificPathCorrect(const CString &szSourcePath);
 

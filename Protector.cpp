@@ -922,33 +922,43 @@ int CProtector::Check()
 */
 int CProtector::GetTmpFileName(CString &szFileName)
 {
-	szFileName.Format(_T("%s.tmp"), m_szRecFileName);
 	FILE * f;
-	if ((f=_tfopen(szFileName,_T("w")) )==NULL) 
+	CString szTmpPath;
+
+	GetTempPath(MAX_PATH_PROT, szTmpPath.GetBuffer(MAX_PATH_PROT + 1));
+	szTmpPath.ReleaseBuffer();
+	if (szTmpPath == _T(""))
 	{
-		CString szTmpPath;
-		GetTempPath(MAX_PATH_PROT, szTmpPath.GetBuffer(MAX_PATH_PROT+1));
-		szTmpPath.ReleaseBuffer();
-		if (szTmpPath==_T(""))
+		szFileName.Format(_T("%s.tmp"), m_szRecFileName);
+		f = _tfopen(szFileName, _T("w"));
+		if (f == NULL)
+		    return -1;
+	} else
+	{
+		if (szTmpPath.Right(1) != '\\') szTmpPath += "\\";
+		CString fileName = GetFileName(m_szRecFileName);
+
+		szFileName.Format(_T("%s%s.tmp"), szTmpPath, fileName);
+		if ((f = _tfopen(szFileName, _T("w"))) == NULL)
 			return -1;
-		else
-		{
-			if (szTmpPath.Right(1)!='\\') szTmpPath+="\\";
-			szFileName.Format(_T("%s%s.tmp"), szTmpPath, m_szRecFileName);
-			if ((f=_tfopen(szFileName,_T("w")) )==NULL) 
-				return -1;
-			else
-				fclose(f);
-		}
-	}
-	else
-	{
-		fclose(f);
-		_tunlink(szFileName);
 	}
 
+	fclose(f);
+	_tunlink(szFileName);
 	return 0;
 }
+
+CString CProtector::GetFileName(const CString &szFullPathName)
+{
+	int idx = szFullPathName.ReverseFind('\\');
+	if (idx < 0)
+		return szFullPathName;
+	else
+	{
+		return szFullPathName.Right(szFullPathName.GetLength() - idx - 1);
+	}
+}
+
 
 int CProtector::Check2()
 {
